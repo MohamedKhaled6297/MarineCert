@@ -1,0 +1,192 @@
+---
+# ====== Page: Global Page ===================================
+id: 0
+identification: 
+  name: Global Page
+
+regions: 
+- # ====== Region: Region Container ============================
+  id: 11022539609607536
+  identification: 
+    name: Region Container
+    type: Static Content
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+- # ====== Region: JS ==========================================
+  id: 11022668965607537
+  identification: 
+    name: JS
+    type: Static Content
+
+  source: 
+    html-code: |
+      <script>
+          let myTimer, timer, minutes, seconds;
+          // function countDown(minute, display){
+          //     timer = minute * 60; 
+          //     myTimer = setInterval(
+          //         () => {
+          //             minutes = parseInt(timer / 60, 10);
+          //             seconds = parseInt(timer % 60, 10);
+      
+          //             // Add 0 if minutes & seconds less than 10
+          //             minutes = minutes < 10 ? '0' + minutes : minutes;
+          //             seconds = seconds < 10 ? '0' + seconds : seconds;
+      
+                      
+          //             if(display){
+          //                 display.textContent = minutes + ':' + seconds;
+          //             }
+      
+          //             if(--timer < 0){
+          //                 stopCounter();
+          //             }
+          //         }
+          //         , 1000 
+      
+          //     );
+          // }
+      
+          // function stopCounter(){
+          //     clearInterval(myTimer);
+          //     apex.server.process(
+          //         'UPDATE_OTP'
+          //         ,{
+          //             x01 : $v('P9999_USERNAME'),
+          //             x02 : $v('P9999_PASSWORD')
+          //         },
+          //         {
+          //             dataType: 'text',
+          //             success: function(){
+          //                 null;
+          //             }
+          //         }
+          //     );
+              
+          //     let display = document.getElementById('display-timer');
+          //     display.innerHTML = 'OTP expired. <a href="#" onclick="sendOtp2User()"> <b>Resend, please</b></a>';
+          // }
+      
+      
+          function countDown(minute){
+              clearInterval(myTimer); 
+      
+              let display = document.getElementById('counter');
+      
+              if(!display){
+                  console.error("counter not found");
+                  return;
+              }
+      
+              timer = minute * 60;
+      
+              myTimer = setInterval(() => {
+                  let minutes = parseInt(timer / 60, 10);
+                  let seconds = parseInt(timer % 60, 10);
+      
+                  minutes = minutes < 10 ? '0' + minutes : minutes;
+                  seconds = seconds < 10 ? '0' + seconds : seconds;
+      
+                  display.textContent = minutes + ':' + seconds;
+      
+                  if (--timer < 0){
+                      stopCounter();
+                  }
+              }, 1000);
+          }
+          
+          function stopCounter(){
+              clearInterval(myTimer);
+      
+              apex.server.process(
+                  'UPDATE_OTP',
+                  {
+                      x01 : $v('P9999_USERNAME'),
+                      x02 : $v('P9999_PASSWORD')
+                  },
+                  { dataType: 'text' }
+              );
+      
+              let display = document.getElementById('display-timer');
+      
+              display.innerHTML = 
+                  'OTP expired. <a href="#" onclick="resendOtp(); return false;"><b>Resend, please</b></a>';
+             
+          }
+          function resendOtp(){
+              // call your existing flow
+              sendOtp2User();
+      
+              // restore timer UI
+              let display = document.getElementById('display-timer');
+              display.innerHTML = 'Time remaining: <b id="counter" style="color:red"></b>';
+      
+      
+              // restart countdown
+              countDown(2);
+          }
+      </script>
+
+  layout: 
+    sequence: 10
+    parent-region: Region Container # 11022539609607536
+    slot: SUB_REGIONS
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+

@@ -1,0 +1,1260 @@
+---
+# ====== Page: Certificate Bulk Upload =======================
+id: 7
+identification: 
+  name: Certificate Bulk Upload
+  alias: CERTIFICATE-BULK-UPLOAD
+  title: Certificate Bulk Upload
+
+appearance: 
+  page-mode: Normal
+  page-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Always
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Certificate Bulk Upload =====================
+  id: 15171184264562714
+  identification: 
+    name: Certificate Bulk Upload
+    title: Certificate Bulk Upload
+    type: Static Content
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+- # ====== Region: Summary Cards ===============================
+  id: 15172641705562729
+  identification: 
+    name: Summary Cards
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      SELECT 'Total Rows' AS CARD_LABEL,
+             CUB_TOTAL_ROWS AS CARD_VALUE,
+             'fa-list' AS CARD_ICON
+      FROM HR.TMGT_CARGO_UPLOAD_BATCH
+      WHERE CUB_ID = :P7_BATCH_ID
+      
+      UNION ALL
+      
+      SELECT 'Uploaded Successfully',
+             CUB_SUCCESS_ROWS,
+             'fa-check-circle'
+      FROM HR.TMGT_CARGO_UPLOAD_BATCH
+      WHERE CUB_ID = :P7_BATCH_ID
+      
+      UNION ALL
+      
+      SELECT 'Failed Rows',
+             CUB_FAILED_ROWS,
+             'fa-warning'
+      FROM HR.TMGT_CARGO_UPLOAD_BATCH
+      WHERE CUB_ID = :P7_BATCH_ID
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 30
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15172753695562730
+    appearance: 
+      layout: Grid
+      grid-columns: Auto
+
+    title: 
+      advanced-formatting: false
+      column: CARD_LABEL
+
+    subtitle: 
+      advanced-formatting: false
+      column: CARD_VALUE
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Icon Class
+      icon-css-classes: fa &CARD_ICON.
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: No Media
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+- # ====== Region: Log Report ==================================
+  id: 15172869946562731
+  identification: 
+    name: Log Report
+    type: Interactive Report
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      SELECT CUR_FILE_ROW_NO          AS ROW_NO,
+      
+             CASE CUR_PROCESS_STATUS
+                 WHEN 'S' THEN
+                     '<span class="cargo-status cargo-status--accepted">
+                          Uploaded
+                      </span>'
+      
+                 WHEN 'F' THEN
+                     '<span class="cargo-status cargo-status--rejected">
+                          Failed
+                      </span>'
+      
+                 ELSE
+                     '<span class="cargo-status cargo-status--incomplete">
+                          Pending
+                      </span>'
+             END AS STATUS_DISPLAY,
+      
+             CUR_CERTIFICATE_NO       AS CERTIFICATE_NO,
+      
+             CUR_INVOICE_NO           AS INVOICE_NO,
+             CUR_INVOICE_VALUE        AS INVOICE_VALUE,
+      
+             CUR_ERROR_MESSAGE        AS FAILURE_REASON
+      
+      FROM HR.TMGT_CARGO_UPLOAD_ROW
+      WHERE CUR_BATCH_ID = :P7_BATCH_ID
+      ORDER BY CUR_FILE_ROW_NO
+
+  layout: 
+    sequence: 40
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Interactive Report
+    template-options: 
+    - '#DEFAULT#'
+    - t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-cache: 
+    caching: Disabled
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15172941154562732
+    link: 
+      link-column: Exclude Link Column
+
+    pagination: 
+      type: Row Ranges X to Y
+      display-position: Bottom - Right
+
+    performance: 
+      lazy-loading: false
+      maximum-rows-to-process: 1000000
+
+    search-bar: 
+      include-search-bar: true
+      search-field: true
+      finder-drop-down: true
+      reports-select-list: true
+      rows-per-page-selector: false
+
+    actions-menu: 
+      include-actions-menu: true
+      filter: true
+      select-columns: true
+      rows-per-page: true
+      sort: true
+      control-break: true
+      highlight: true
+      compute: true
+      aggregate: true
+      chart: true
+      group-by: true
+      pivot: true
+      flashback: true
+      save-report: true
+      save-public-report: false
+      reset: true
+      help: true
+      download: true
+      subscription: true
+
+    download: 
+      formats: 
+      - CSV
+      - HTML
+      - Excel
+      - PDF
+      send-as-email: true
+
+    heading: 
+      fixed-to: Page
+
+    icon-view: 
+      show: false
+
+    detail-view: 
+      show: false
+
+    saved-reports: 
+    - # ====== Saved Report: Primary Report ========================
+      id: 15264798304037141
+      identification: 
+        name: Primary Report
+        alias: 94599
+
+    columns: 
+    - # ====== Column: ROW_NO ======================================
+      id: 15173071779562733
+      identification: 
+        column-name: ROW_NO
+        type: Plain Text
+
+      heading: 
+        heading: Row No
+        alignment: end
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 10
+        column-alignment: end
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: STATUS_DISPLAY ==============================
+      id: 15173168216562734
+      identification: 
+        column-name: STATUS_DISPLAY
+        type: Plain Text
+
+      heading: 
+        heading: Status Display
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 20
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: false
+
+    - # ====== Column: CERTIFICATE_NO ==============================
+      id: 15173313774562735
+      identification: 
+        column-name: CERTIFICATE_NO
+        type: Plain Text
+
+      heading: 
+        heading: Certificate No
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 30
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: INVOICE_NO ==================================
+      id: 15173355011562736
+      identification: 
+        column-name: INVOICE_NO
+        type: Plain Text
+
+      heading: 
+        heading: Invoice No
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 40
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: INVOICE_VALUE ===============================
+      id: 15173511049562737
+      identification: 
+        column-name: INVOICE_VALUE
+        type: Plain Text
+
+      heading: 
+        heading: Invoice Value
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 50
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: FAILURE_REASON ==============================
+      id: 15257185620036588
+      identification: 
+        column-name: FAILURE_REASON
+        type: Plain Text
+
+      heading: 
+        heading: Failure Reason
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 60
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    printing: 
+      output: 
+        layout: Default Report Layout
+        view-file-as: Attachment
+
+      page: 
+        size: Letter
+        orientation: Landscape
+        units: Inches
+        width: 11
+        height: 8.5
+        border-width: 0.5
+        border-color: '#666666'
+
+      page-header: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 12
+        font-color: '#000000'
+        alignment: center
+
+      column-headings: 
+        font: Helvetica
+        font-weight: Bold
+        font-size: 10
+        font-color: '#000000'
+        background-color: '#EEEEEE'
+
+      columns: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 10
+        font-color: '#000000'
+        background-color: '#FFFFFF'
+
+      page-footer: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 12
+        font-color: '#000000'
+        alignment: center
+
+- # ====== Region: Breadcrumb ==================================
+  id: 15251809958711224
+  identification: 
+    name: Breadcrumb
+    type: Breadcrumb
+
+  source: 
+    breadcrumb: Breadcrumb # 25470073129156670
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Title Bar
+    template-options: 
+    - '#DEFAULT#'
+    - t-BreadcrumbRegion--useBreadcrumbTitle
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    appearance: 
+      breadcrumb-template: Breadcrumb
+      template-options: 
+      - '#DEFAULT#'
+
+page-items: 
+- # ====== Page Item: P7_CONTRACT_NO ===========================
+  id: 15171309535562715
+  identification: 
+    name: P7_CONTRACT_NO
+    type: Popup LOV
+
+  label: 
+    label: Contract No
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 10
+    region: Certificate Bulk Upload # 15171184264562714
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT DISTINCT
+             POLH_NO || ' / ' || INSURED_NAME         AS DISPLAY_VALUE,
+             POLH_NO                                  AS RETURN_VALUE
+      FROM HR.TMGT_CARGO_OPEN_COVER
+      Where TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE)
+      ORDER BY DISPLAY_VALUE;
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P7_FILE ==================================
+  id: 15171368606562716
+  identification: 
+    name: P7_FILE
+    type: File Upload
+
+  label: 
+    label: File
+    alignment: Left
+
+  display: 
+    display-as: Inline File Browse
+    capture-using: NONE
+
+  storage:: 
+    type: Table APEX_APPLICATION_TEMP_FILES
+    purge-file-at: End of Session
+    allow-multiple-files: false
+
+  layout: 
+    sequence: 20
+    region: Certificate Bulk Upload # 15171184264562714
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  security: 
+    session-state-protection: Unrestricted
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P7_BATCH_ID ==============================
+  id: 15171455603562717
+  identification: 
+    name: P7_BATCH_ID
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 30
+    region: Certificate Bulk Upload # 15171184264562714
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Session (Persistent)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+buttons: 
+- # ====== Button: DOWNLOAD_TEMPLATE ===========================
+  id: 15171585742562718
+  identification: 
+    button-name: DOWNLOAD_TEMPLATE
+    label: Download Template
+
+  layout: 
+    sequence: 40
+    region: Certificate Bulk Upload # 15171184264562714
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    alignment: Left center
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+
+- # ====== Button: UPLOAD_CERTIFICATES =========================
+  id: 15171652097562719
+  identification: 
+    button-name: UPLOAD_CERTIFICATES
+    label: Upload Certificates
+
+  layout: 
+    sequence: 50
+    region: Certificate Bulk Upload # 15171184264562714
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    alignment: Left center
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+
+validations: 
+- # ====== Validation: VALIDATE_BULK_CONTRACT ==================
+  id: 15172245200562725
+  identification: 
+    name: VALIDATE_BULK_CONTRACT
+
+  execution: 
+    sequence: 10
+
+  validation: 
+    type: Item is NOT NULL
+    item: P7_CONTRACT_NO
+    always-execute: false
+
+  error: 
+    error-message: Please select Contract No.
+    display-location: Inline with Field and in Notification
+
+  server-side-condition: 
+    when-button-pressed: UPLOAD_CERTIFICATES # 15171652097562719
+
+- # ====== Validation: VALIDATE_BULK_FILE ======================
+  id: 15172339135562726
+  identification: 
+    name: VALIDATE_BULK_FILE
+
+  execution: 
+    sequence: 20
+
+  validation: 
+    type: Item is NOT NULL
+    item: P7_FILE
+    always-execute: false
+
+  error: 
+    error-message: Please select an XLSX file.
+    display-location: Inline with Field and in Notification
+
+  server-side-condition: 
+    when-button-pressed: UPLOAD_CERTIFICATES # 15171652097562719
+
+processes: 
+- # ====== Process: DOWNLOAD_CARGO_TEMPLATE ====================
+  id: 15172218031562724
+  identification: 
+    name: DOWNLOAD_CARGO_TEMPLATE
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_CONTEXT APEX_EXEC.T_CONTEXT;
+          L_EXPORT  APEX_DATA_EXPORT.T_EXPORT;
+      BEGIN
+          L_CONTEXT :=
+              APEX_EXEC.OPEN_QUERY_CONTEXT
+              (
+                  P_LOCATION  => APEX_EXEC.C_LOCATION_LOCAL_DB,
+      
+                  P_SQL_QUERY => q'~
+                      SELECT
+                          CAST(NULL AS VARCHAR2(200))
+                              AS BENEFICIARY_NAME,
+      
+                          CAST(NULL AS VARCHAR2(500))
+                              AS BENEFICIARY_ADDRESS,
+      
+                          CAST(NULL AS VARCHAR2(20))
+                              AS ISSUE_DATE,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS COUNTRY_FROM,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS PORT_OF_LOADING,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS PLACE_OF_LOADING,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS VESSEL_NAME,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS TRANSIT_MODE,
+      
+                          CAST(NULL AS NUMBER)
+                              AS INVOICE_VALUE,
+      
+                          CAST(NULL AS VARCHAR2(1))
+                              AS FREIGHT_YN,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS FREIGHT_CURRENCY,
+      
+                          CAST(NULL AS NUMBER)
+                              AS FREIGHT_CHARGE,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS HBL,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS MBL,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS INCO_TERMS,
+      
+                          CAST(NULL AS NUMBER)
+                              AS INCO_PERCENT,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS LC_NO,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS INVOICE_CURRENCY,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS INVOICE_NO,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS COUNTRY_TO,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS PORT_OF_ARRIVAL,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS FINAL_DESTINATION,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS VOYAGE_NO,
+      
+                          CAST(NULL AS VARCHAR2(20))
+                              AS DEPARTURE_DATE,
+      
+                          CAST(NULL AS VARCHAR2(500))
+                              AS GOODS_DESCRIPTION,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS ACID_NO,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS CONTAINER_NO,
+      
+                          CAST(NULL AS VARCHAR2(100))
+                              AS ISSUANCE_CURRENCY
+      
+                      FROM DUAL
+                      WHERE 1 = 0
+                  ~'
+              );
+      
+          L_EXPORT :=
+              APEX_DATA_EXPORT.EXPORT
+              (
+                  P_CONTEXT   => L_CONTEXT,
+                  P_FORMAT    => APEX_DATA_EXPORT.C_FORMAT_XLSX,
+                  P_FILE_NAME => 'Cargo_Certificate_Template'
+              );
+      
+          APEX_EXEC.CLOSE(L_CONTEXT);
+      
+          APEX_DATA_EXPORT.DOWNLOAD
+          (
+              P_EXPORT => L_EXPORT
+          );
+      
+      EXCEPTION
+          WHEN OTHERS THEN
+              APEX_EXEC.CLOSE(L_CONTEXT);
+              RAISE;
+      END;
+
+  execution: 
+    sequence: 10
+    point: After Submit
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    type: Request = Value
+    value: DOWNLOAD_TEMPLATE
+
+- # ====== Process: PARSE_CARGO_UPLOAD_FILE ====================
+  id: 15172498648562727
+  identification: 
+    name: PARSE_CARGO_UPLOAD_FILE
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_FILE_BLOB     BLOB;
+          L_FILE_NAME     VARCHAR2(500);
+          L_BATCH_ID      NUMBER;
+          L_TOTAL_ROWS    NUMBER := 0;
+      BEGIN
+          SELECT BLOB_CONTENT,
+                 FILENAME
+            INTO L_FILE_BLOB,
+                 L_FILE_NAME
+            FROM APEX_APPLICATION_TEMP_FILES
+           WHERE NAME = :P7_FILE;
+      
+          INSERT INTO HR.TMGT_CARGO_UPLOAD_BATCH
+          (
+              CUB_CONTRACT_NO,
+              CUB_FILE_NAME,
+              CUB_STATUS,
+              CUB_CR_USER,
+              CUB_CR_DATE
+          )
+          VALUES
+          (
+              :P7_CONTRACT_NO,
+              L_FILE_NAME,
+              'UPLOADED',
+              :APP_USER,
+              SYSDATE
+          )
+          RETURNING CUB_ID INTO L_BATCH_ID;
+      
+          FOR R IN
+          (
+              SELECT *
+                FROM TABLE
+                (
+                    APEX_DATA_PARSER.PARSE
+                    (
+                        P_CONTENT           => L_FILE_BLOB,
+                        P_FILE_NAME         => L_FILE_NAME,
+                        P_SKIP_ROWS         => 1,
+                        P_DETECT_DATA_TYPES => 'N'
+                    )
+                )
+          )
+          LOOP
+      
+              IF     R.COL001 IS NULL
+                 AND R.COL003 IS NULL
+                 AND R.COL009 IS NULL
+                 AND R.COL028 IS NULL
+              THEN
+                  CONTINUE;
+              END IF;
+      
+              L_TOTAL_ROWS := L_TOTAL_ROWS + 1;
+      
+              INSERT INTO HR.TMGT_CARGO_UPLOAD_ROW
+              (
+                  CUR_BATCH_ID,
+                  CUR_FILE_ROW_NO,
+      
+                  CUR_BENEFICIARY_NAME,
+                  CUR_BENEFICIARY_ADDRESS,
+                  CUR_ISSUE_DATE,
+      
+                  CUR_COUNTRY_FROM,
+                  CUR_PORT_OF_LOADING,
+                  CUR_PLACE_OF_LOADING,
+                  CUR_VESSEL_NAME,
+                  CUR_TRANSIT_MODE,
+      
+                  CUR_INVOICE_VALUE,
+      
+                  CUR_FREIGHT_YN,
+                  CUR_FREIGHT_CURRENCY,
+                  CUR_FREIGHT_CHARGE,
+      
+                  CUR_HBL,
+                  CUR_MBL,
+      
+                  CUR_INCO_TERMS,
+                  CUR_INCO_PERCENT,
+      
+                  CUR_LC_NO,
+                  CUR_INVOICE_CURRENCY,
+                  CUR_INVOICE_NO,
+      
+                  CUR_COUNTRY_TO,
+                  CUR_PORT_OF_ARRIVAL,
+                  CUR_FINAL_DESTINATION,
+                  CUR_VOYAGE_NO,
+                  CUR_DEPARTURE_DATE,
+                  CUR_GOODS_DESCRIPTION,
+      
+                  CUR_ACID_NO,
+                  CUR_CONTAINER_NO,
+                  CUR_ISSUANCE_CURRENCY,
+      
+                  CUR_PROCESS_STATUS
+              )
+              VALUES
+              (
+                  L_BATCH_ID,
+                  R.LINE_NUMBER,
+      
+                  TRIM(R.COL001),
+                  TRIM(R.COL002),
+                  TRIM(R.COL003),
+      
+                  TRIM(R.COL004),
+                  TRIM(R.COL005),
+                  TRIM(R.COL006),
+                  TRIM(R.COL007),
+                  TRIM(R.COL008),
+      
+                  TRIM(R.COL009),
+      
+                  TRIM(R.COL010),
+                  TRIM(R.COL011),
+                  TRIM(R.COL012),
+      
+                  TRIM(R.COL013),
+                  TRIM(R.COL014),
+      
+                  TRIM(R.COL015),
+                  TRIM(R.COL016),
+      
+                  TRIM(R.COL017),
+                  TRIM(R.COL018),
+                  TRIM(R.COL019),
+      
+                  TRIM(R.COL020),
+                  TRIM(R.COL021),
+                  TRIM(R.COL022),
+                  TRIM(R.COL023),
+                  TRIM(R.COL024),
+                  TRIM(R.COL025),
+      
+                  TRIM(R.COL026),
+                  TRIM(R.COL027),
+                  TRIM(R.COL028),
+      
+                  'P'
+              );
+          END LOOP;
+      
+          UPDATE HR.TMGT_CARGO_UPLOAD_BATCH
+             SET CUB_TOTAL_ROWS = L_TOTAL_ROWS,
+                 CUB_STATUS     = 'PROCESSING'
+           WHERE CUB_ID = L_BATCH_ID;
+      
+          :P7_BATCH_ID := L_BATCH_ID;
+      
+          COMMIT;
+      END;
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+- # ====== Process: PROCESS_CARGO_BATCH ========================
+  id: 15172548440562728
+  identification: 
+    name: PROCESS_CARGO_BATCH
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      BEGIN
+          HR.PKG_CARGO_BULK.PROCESS_BATCH
+          (
+              P_BATCH_ID => :P7_BATCH_ID,
+              P_USER     => :APP_USER
+          );
+      END;
+
+  execution: 
+    sequence: 20
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  success-message: 
+    success-message: The upload file has been processed.
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: UPLOAD_CERTIFICATES # 15171652097562719
+

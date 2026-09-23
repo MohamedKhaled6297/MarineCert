@@ -1,0 +1,15 @@
+---
+- # ====== Print Server: Oracle BI Publisher ===================
+  id: 4200953720770031
+  identification: 
+    name: Oracle BI Publisher
+    type: Oracle BI Publisher
+
+  endpoint-url: 
+    url: 'http://localhost:9502/xmlpserver/services/rest/v1/format/render'
+
+  advanced: 
+    static-id: BI_PUBLISHER
+    prompt-on-install: false
+    server-timeout: 300
+

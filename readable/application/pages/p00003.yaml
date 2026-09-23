@@ -1,0 +1,5067 @@
+---
+# ====== Page: Add/Edit Certificate ==========================
+id: 3
+identification: 
+  name: Add/Edit Certificate
+  alias: ADD-EDIT-CERTIFICATE
+  title: Add/Edit Certificate
+
+appearance: 
+  page-mode: Modal Dialog
+  dialog-template: Drawer
+  template-options: 
+  - '#DEFAULT#'
+  - js-dialog-class-t-Drawer--pullOutEnd
+
+dialog: 
+  chained: false
+  resizable: true
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+javascript: 
+  function-and-global-variable-declaration: |
+    function clearCargoCalculatedValues() {
+    
+        [
+            "P3_TC_FREIGHT_FINAL",
+            "P3_TC_ADD_INCOTERMS",
+            "P3_TC_INCO_VALUE",
+            "P3_TC_TOTAL_SHIPMENT_VALUE",
+            "P3_TC_TOTAL_SUM_COVERS",
+            "P3_TC_NET_PREMIUM",
+            "P3_TC_P_STAMP",
+            "P3_TC_CONTRACT_STAMP_DUTY",
+            "P3_TC_SUP_FEE",
+            "P3_TC_SERVICE_FEES",
+            "P3_TC_P_H_GUARANTEE_FUND",
+            "P3_TC_ISSUE_FEES",
+            "P3_TC_GROSS_PREMIUM"
+        ].forEach(function (itemName) {
+            apex.item(itemName).setValue("");
+        });
+    }
+    
+    
+    function calculateCargoValues() {
+    
+        // const invoiceValue = apex.item("P3_TC_INVOICE_VALUE").getValue();
+    
+        const createButton = apex.jQuery("#BTN_CREATE");
+    
+    
+        // if (
+        //     invoiceValue === null ||
+        //     invoiceValue === ""
+        // ) {
+        //     clearCargoCalculatedValues();
+        //     return;
+        // }
+    
+        createButton.prop("disabled", true);
+    
+        apex.server.process(
+            "CALCULATE_CARGO_VALUES",
+            {
+    
+                pageItems:
+                      "#P3_TC_INVOICE_VALUE"
+                    + ",#P3_TC_FREIGHT_YN"
+                    + ",#P3_TC_FREIGHT_CHARGE"
+                    + ",#P3_TC_FREIGHT_EX_RATE"
+                    + ",#P3_TC_INCO_TERMS"
+                    + ",#P3_TC_INCO_PREC"
+                    + ",#P3_TC_ISSUANCE_EX_RATE"
+                    + ",#P3_TC_COVER_RATE"
+                    
+            },
+            
+            {
+                dataType: "json",
+    
+                loadingIndicator: "#P3_TC_GROSS_PREMIUM",
+    
+                success: function (data) {
+    
+                    if (!data.success) {
+                        apex.message.alert(
+                            data.message ||
+                            "Cargo calculation failed."
+                        );
+    
+                        return;
+                    }
+    
+                    apex.item("P3_TC_FREIGHT_FINAL").setValue(data.freightFinal);
+                    apex.item("P3_TC_ADD_INCOTERMS").setValue(data.addIncoterms);
+                    apex.item("P3_TC_INCO_VALUE").setValue(data.incoValue);
+                    apex.item("P3_TC_TOTAL_SHIPMENT_VALUE").setValue(data.totalShipmentValue);
+                    apex.item("P3_TC_TOTAL_SUM_COVERS").setValue(data.totalSumCovers);
+                    const cardsRegion = apex.region("cargo_limit_cards");
+                    if (cardsRegion) {
+                        cardsRegion.refresh();
+                    }
+                    apex.item("P3_TC_NET_PREMIUM").setValue(data.netPremium);
+                    apex.item("P3_TC_P_STAMP").setValue(data.proportionalStamp);
+                    apex.item("P3_TC_CONTRACT_STAMP_DUTY").setValue(data.contractStamp);
+                    apex.item("P3_TC_SUP_FEE").setValue(data.supervisionFee);
+                    apex.item("P3_TC_SERVICE_FEES").setValue(data.serviceFees);
+                    apex.item("P3_TC_P_H_GUARANTEE_FUND").setValue(data.guaranteeFund);
+                    apex.item("P3_TC_ISSUE_FEES").setValue(data.issueFees);
+                    apex.item("P3_TC_GROSS_PREMIUM").setValue(data.grossPremium);
+                },
+    
+                error: function (
+                    jqXHR,
+                    textStatus,
+                    errorThrown
+                ) {
+                    console.error(
+                        jqXHR.responseText
+                    );
+    
+                    apex.message.alert(
+                        "Cargo calculation error: "
+                        + (errorThrown || textStatus)
+                    );
+                },
+    
+                complete: function () {
+                    createButton.prop(
+                        "disabled",
+                        false
+                    );
+                }
+            }
+        );
+    }
+    
+    
+    
+    
+    
+    
+    
+    // function calculateCargoValues() {
+    
+    
+    //     function getNumber(itemName) {
+    //         const rawValue = apex.item(itemName).getValue();
+    
+    //         if (
+    //             rawValue === null ||
+    //             rawValue === undefined ||
+    //             rawValue === ""
+    //         ) {
+    //             return 0;
+    //         }
+    
+    //         const numberValue = Number(
+    //             String(rawValue).replace(/,/g, "")
+    //         );
+    
+    //         return Number.isFinite(numberValue)
+    //             ? numberValue
+    //             : 0;
+    //     }
+    
+    
+    //     function setNumber(itemName, value, decimals) {
+    //         const finalValue = Number.isFinite(value) ? value : 0;
+    
+    //         apex.item(itemName).setValue(
+    //             finalValue.toFixed(decimals ?? 2),
+    //             null,
+    //             true
+    //         );
+    //     }
+    
+    //     const invoiceValue = getNumber("P3_TC_INVOICE_VALUE");
+    //     const freightYN = apex.item("P3_TC_FREIGHT_YN").getValue();
+    //     const freightCharge = getNumber("P3_TC_FREIGHT_CHARGE");
+    //     const freightExchangeRate = getNumber("P3_TC_FREIGHT_EX_RATE");
+    
+    //     const incoTerm = String( apex.item("P3_TC_INCO_TERMS").getValue() || "").trim().toUpperCase();
+    
+    //     const incoPercent = getNumber("P3_TC_INCO_PREC") / 100;
+    
+    //     const issuanceExchangeRate = getNumber("P3_TC_ISSUANCE_EX_RATE");
+    
+    //     /*
+    //      * نفترض أن Premia ترجع 0.25 لتعني 0.25%.
+    //      * لذلك نقسم على 100.
+    //      */
+    //     const coverRate = 0;
+    //         // getNumber("P3_TC_COVER_RATE") / 100;
+    
+    
+    //     /* 1. Freight Final */
+    //     const freightFinal =
+    //         freightYN === "1"
+    //             ? freightCharge * freightExchangeRate
+    //             : 0;
+    
+    
+    //     /* 2. Add Incoterms */
+    //     let addIncoterms = 0;
+    
+    //     if (incoTerm === "FCA") {
+    //         addIncoterms = invoiceValue * 0.03;
+    
+    //     } else if (incoTerm === "EXW") {
+    //         addIncoterms = invoiceValue * 0.35;
+    //     }
+    
+    
+    //     /* 3. Inco Value */
+    //     const incoValue =
+    //         (
+    //             invoiceValue +
+    //             freightFinal +
+    //             addIncoterms
+    //         ) * incoPercent;
+    
+    
+    //     /* 4. Total Shipment Value */
+    //     const totalShipmentValue = invoiceValue + freightFinal + incoValue + addIncoterms;
+    
+    
+    //     /* 12. Total Sum Covers */
+    //     const totalSumCovers = totalShipmentValue * issuanceExchangeRate;
+    
+    
+    //     /* 13. Net Premium */
+    //     const netPremium = totalSumCovers * coverRate;
+    
+    
+    //     /* 5. Proportional Stamp */
+    //     const proportionalStamp = netPremium * 0.055;
+    
+    
+    //     /* 6. Contract Stamp */
+    //     const contractStamp = 1;
+    
+    
+    //     /* 7. Supervision Fees */
+    //     const supervisionFees = netPremium * 0.006;
+    
+    
+    //     /* 8. Service Fees */
+    //     const serviceFees = netPremium * 0.001;
+    
+    
+    //     /* 9. Guarantee Fund Fees */
+    //     const guaranteeFees = netPremium * 0.002;
+    
+    
+    //     /* 10. Issuance Fees */
+    //     const issuanceFees = 5;
+    
+    
+    //     /*
+    //      * 11. Total/Gross Premium.
+    //      * Math.ceil تقرب إلى العدد الصحيح الأعلى.
+    //      */
+    //     const grossPremium = Math.ceil(
+    //         proportionalStamp +
+    //         contractStamp +
+    //         supervisionFees +
+    //         serviceFees +
+    //         guaranteeFees +
+    //         issuanceFees
+    //     );
+    
+    
+    
+    //     setNumber("P3_TC_FREIGHT_FINAL", freightFinal, 2);
+    //     setNumber("P3_TC_ADD_INCOTERMS", addIncoterms, 2);
+    //     setNumber("P3_TC_INCO_VALUE", incoValue, 2);
+    //     setNumber("P3_TC_TOTAL_SHIPMENT_VALUE", totalShipmentValue, 2);
+    //     setNumber("P3_TC_TOTAL_SUM_COVERS", totalSumCovers, 2);
+    //     setNumber("P3_TC_NET_PREMIUM", netPremium, 2);
+    //     setNumber("P3_TC_P_STAMP", proportionalStamp, 2);
+    //     setNumber("P3_TC_CONTRACT_STAMP_DUTY", contractStamp, 2);
+    //     setNumber("P3_TC_SUP_FEE", supervisionFees, 2);
+    //     setNumber("P3_TC_SERVICE_FEES", serviceFees, 2);
+    //     setNumber("P3_TC_P_H_GUARANTEE_FUND", guaranteeFees, 2);
+    //     setNumber("P3_TC_ISSUE_FEES", issuanceFees, 2);
+    //     setNumber("P3_TC_GROSS_PREMIUM", grossPremium, 0);
+    // }
+
+read-only: 
+  type: Expression
+  language: PL/SQL
+  pl/sql-expression: ":P3_TC_STATUS = 'C'"
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Add/Edit Certificate ========================
+  id: 14873526722704991
+  identification: 
+    name: Add/Edit Certificate
+    type: Form
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: TMGT_CARGO
+    include-rowid-column: false
+
+  layout: 
+    sequence: 30
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    edit: 
+      enabled: true
+      allowed-operations: 
+      - Add Row
+      - Update Row
+      - Delete Row
+      lost-update-type: Row Values
+
+- # ====== Region: Buttons =====================================
+  id: 14910278069705008
+  identification: 
+    name: Buttons
+    type: Static Content
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: REGION_POSITION_03
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Buttons Container
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: Text (escape special characters)
+      show-line-breaks: true
+
+- # ====== Region: Policy Limit Summary ========================
+  id: 15168884432562691
+  identification: 
+    name: Policy Limit Summary
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      WITH POLICY_DATA AS
+      (
+          SELECT NVL(SUM(SUM_INSURED), 0) AS POLICY_SUM_INSURED
+            FROM HR.TMGT_CARGO_OPEN_COVER
+           WHERE POLH_NO = :P3_TC_CONTRACT_NO
+             AND (
+                    EXPIREY_DATE IS NULL
+                 OR TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE)
+             )
+      ),
+      CERTIFICATE_DATA AS
+      (
+          SELECT NVL(SUM(TC_TOTAL_SUM_COVERS), 0) AS PREVIOUS_COVERS,
+                 COUNT(*)                         AS CERTIFICATE_COUNT
+            FROM HR.TMGT_CARGO
+           WHERE TC_CONTRACT_NO = :P3_TC_CONTRACT_NO
+             AND NVL(TC_STATUS, 'I') IN ('I', 'C')
+      ),
+      SUMMARY_DATA AS
+      (
+          SELECT P.POLICY_SUM_INSURED,
+                 C.PREVIOUS_COVERS,
+                 C.CERTIFICATE_COUNT,
+      
+                 NVL(:P3_TC_TOTAL_SUM_COVERS, 0)
+                     AS CURRENT_CERTIFICATE,
+      
+                 P.POLICY_SUM_INSURED
+                 - C.PREVIOUS_COVERS
+                 - NVL(:P3_TC_TOTAL_SUM_COVERS, 0)
+                     AS REMAINING_AFTER_CURRENT
+      
+            FROM POLICY_DATA P
+            CROSS JOIN CERTIFICATE_DATA C
+      ),
+      CARD_DATA AS
+      (
+          SELECT 1 AS SORT_ORDER,
+      
+                 TO_CHAR(
+                     POLICY_SUM_INSURED,
+                     'FM999G999G999G999G990D00'
+                 ) AS CARD_TITLE,
+      
+                 'Policy Sum Insured' AS CARD_SUBTITLE,
+      
+                 'fa-shield' AS CARD_ICON
+      
+            FROM SUMMARY_DATA
+           WHERE :P3_TC_CONTRACT_NO IS NOT NULL
+      
+          UNION ALL
+      
+          SELECT 2 AS SORT_ORDER,
+      
+                 TO_CHAR(
+                     PREVIOUS_COVERS,
+                     'FM999G999G999G999G990D00'
+                 ) AS CARD_TITLE,
+      
+                 'Previously Used - '
+                 || CERTIFICATE_COUNT
+                 || ' Certificate(s)' AS CARD_SUBTITLE,
+      
+                 'fa-database' AS CARD_ICON
+      
+            FROM SUMMARY_DATA
+           WHERE :P3_TC_CONTRACT_NO IS NOT NULL
+      
+          UNION ALL
+      
+          SELECT 3 AS SORT_ORDER,
+      
+                 TO_CHAR(
+                     CURRENT_CERTIFICATE,
+                     'FM999G999G999G999G990D00'
+                 ) AS CARD_TITLE,
+      
+                 'Current Certificate' AS CARD_SUBTITLE,
+      
+                 'fa-file' AS CARD_ICON
+      
+            FROM SUMMARY_DATA
+           WHERE :P3_TC_CONTRACT_NO IS NOT NULL
+      
+          UNION ALL
+      
+          SELECT 4 AS SORT_ORDER,
+      
+                 TO_CHAR(
+                     REMAINING_AFTER_CURRENT,
+                     'FM999G999G999G999G990D00'
+                 ) AS CARD_TITLE,
+      
+                 CASE
+                     WHEN REMAINING_AFTER_CURRENT < 0
+                         THEN 'Limit Exceeded'
+                     ELSE 'Remaining After Current'
+                 END AS CARD_SUBTITLE,
+      
+                 CASE
+                      WHEN REMAINING_AFTER_CURRENT < 0
+                          THEN 'fa-warning'
+                      ELSE 'fa-calculator'
+                  END AS CARD_ICON
+      
+            FROM SUMMARY_DATA
+           WHERE :P3_TC_CONTRACT_NO IS NOT NULL
+      )
+      SELECT CARD_TITLE,
+             CARD_SUBTITLE,
+             CARD_ICON
+        FROM CARD_DATA
+       ORDER BY SORT_ORDER
+    page-items-to-submit: 
+    - P3_TC_CONTRACT_NO
+    - P3_TC_TOTAL_SUM_COVERS
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: cargo_limit_cards
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-side-condition: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: ':P3_TC_ID IS NULL'
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15169004869562692
+    appearance: 
+      layout: Grid
+      grid-columns: 4 Columns
+
+    title: 
+      advanced-formatting: false
+      column: CARD_TITLE
+
+    subtitle: 
+      advanced-formatting: false
+      column: CARD_SUBTITLE
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Icon Class
+      icon-css-classes: fa &CARD_ICON.
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: No Media
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+page-items: 
+- # ====== Page Item: P3_TC_CONTAINER_NO =======================
+  id: 14632378884375635
+  identification: 
+    name: P3_TC_CONTAINER_NO
+    type: Text Field
+
+  label: 
+    label: Container No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 380
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CONTAINER_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ID =================================
+  id: 14873906815704992
+  identification: 
+    name: P3_TC_ID
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 10
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ID
+    data-type: NUMBER
+    query-only: true
+    primary-key: true
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Checksum Required - Session Level
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_CONTRACT_NO ========================
+  id: 14874228369704992
+  identification: 
+    name: P3_TC_CONTRACT_NO
+    type: Popup LOV
+
+  label: 
+    label: Contract No
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 20
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT DISTINCT
+             POLH_NO || ' / ' || INSURED_NAME         AS DISPLAY_VALUE,
+             POLH_NO                                  AS RETURN_VALUE
+      FROM HR.TMGT_CARGO_OPEN_COVER
+      Where TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE)
+      ORDER BY DISPLAY_VALUE;
+    display-extra-values: true
+    display-null-value: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CONTRACT_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INSURED_NAME =======================
+  id: 14874661615704993
+  identification: 
+    name: P3_TC_INSURED_NAME
+    type: Text Field
+
+  label: 
+    label: Insured Name
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 40
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INSURED_NAME
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_BENEFICIARY_NAME ===================
+  id: 14875038791704993
+  identification: 
+    name: P3_TC_BENEFICIARY_NAME
+    type: Text Field
+
+  label: 
+    label: Beneficiary Name
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 60
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_BENEFICIARY_NAME
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ISSUE_DATE =========================
+  id: 14875513556704993
+  identification: 
+    name: P3_TC_ISSUE_DATE
+    type: Date Picker
+
+  label: 
+    label: Issue Date
+    alignment: Left
+
+  settings: 
+    show-time: false
+    display-as: Popup
+    minimum-date: None
+    maximum-date: None
+    multiple-months: No
+    use-defaults: true
+
+  layout: 
+    sequence: 80
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    format-mask: DD/MM/RRRR
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ISSUE_DATE
+    data-type: DATE
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ISSUANCE_EX_RATE ===================
+  id: 14875916552704993
+  identification: 
+    name: P3_TC_ISSUANCE_EX_RATE
+    type: Text Field
+
+  label: 
+    label: Issuance Exchange Rate
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 100
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: 6
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ISSUANCE_EX_RATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_COUNTRY_FROM =======================
+  id: 14876283382704994
+  identification: 
+    name: P3_TC_COUNTRY_FROM
+    type: Select List
+
+  label: 
+    label: Country From
+    alignment: Left
+
+  settings: 
+    page-action-on-selection: None
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 120
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    height: 1
+
+  validation: 
+    value-required: true
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT 
+          DISTINCT 
+          MP_COUNTRY_CODE || ' - ' || COUNTRY, 
+          MP_COUNTRY_CODE 
+      FROM 
+          HR.TMGT_MARINE_PORTS 
+      WHERE 
+          COUNTRY IS NOT NULL
+      ORDER BY 
+          1
+    display-extra-values: false
+    display-null-value: true
+    null-display-value: Select
+    null-return-value: NULL
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_COUNTRY_FROM
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_PORT_OF_LOADING ====================
+  id: 14876672157704994
+  identification: 
+    name: P3_TC_PORT_OF_LOADING
+    type: Text Field
+
+  label: 
+    label: Port Of Loading
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 140
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_PORT_OF_LOADING
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_PLACE_OF_LOADING ===================
+  id: 14877121028704994
+  identification: 
+    name: P3_TC_PLACE_OF_LOADING
+    type: Text Field
+
+  label: 
+    label: Place Of Loading
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 160
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_PLACE_OF_LOADING
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_NAME_OF_THE_VESSEL =================
+  id: 14877518658704994
+  identification: 
+    name: P3_TC_NAME_OF_THE_VESSEL
+    type: Text Field
+
+  label: 
+    label: Name Of The Vessel
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 180
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_NAME_OF_THE_VESSEL
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_TRANSIT_MODE =======================
+  id: 14877850179704994
+  identification: 
+    name: P3_TC_TRANSIT_MODE
+    type: Popup LOV
+
+  label: 
+    label: Transit Mode
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 200
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  list-of-values: 
+    type: Static Values
+    static-values: 'STATIC:Air;Air,Ocean;Ocean'
+    display-extra-values: false
+    display-null-value: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_TRANSIT_MODE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INVOICE_VALUE ======================
+  id: 14878320343704994
+  identification: 
+    name: P3_TC_INVOICE_VALUE
+    type: Number Field
+
+  label: 
+    label: Invoice Value
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 220
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INVOICE_VALUE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FREIGHT_YN =========================
+  id: 14878631362704995
+  identification: 
+    name: P3_TC_FREIGHT_YN
+    type: Switch
+
+  label: 
+    label: Freight Y/N
+    alignment: Left
+
+  settings: 
+    use-defaults: false
+    on-value: 1
+    off-value: 0
+
+  layout: 
+    sequence: 240
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+
+  validation: 
+    value-required: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FREIGHT_YN
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Static
+    static-value: 0
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FREIGHT_CURRENCY ===================
+  id: 14879087345704995
+  identification: 
+    name: P3_TC_FREIGHT_CURRENCY
+    type: Popup LOV
+
+  label: 
+    label: Freight Currency
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 250
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT DISTINCT
+             CER_CONV_FM_CURR_CODE || ' - ' || CURR_ISO_CODE AS DISPLAY_VALUE,
+             CER_CONV_FM_CURR_CODE                           AS RETURN_VALUE
+      FROM HR.TMGT_CARGO_EXG_RATE
+      ORDER BY DISPLAY_VALUE;
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FREIGHT_CURRENCY
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FREIGHT_CHARGE =====================
+  id: 14879520059704995
+  identification: 
+    name: P3_TC_FREIGHT_CHARGE
+    type: Number Field
+
+  label: 
+    label: Freight Charge
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 270
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FREIGHT_CHARGE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_HBL ================================
+  id: 14879843981704995
+  identification: 
+    name: P3_TC_HBL
+    type: Text Field
+
+  label: 
+    label: Hbl
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 290
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_HBL
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INCO_TERMS =========================
+  id: 14880292190704996
+  identification: 
+    name: P3_TC_INCO_TERMS
+    type: Popup LOV
+
+  label: 
+    label: Inco Terms
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 310
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  list-of-values: 
+    type: Static Values
+    static-values: 'STATIC:FCA;FCA,EWX; EWX'
+    display-extra-values: true
+    display-null-value: true
+    null-display-value: None
+    null-return-value: null
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INCO_TERMS
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: null
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ADD_INCOTERMS ======================
+  id: 14880668478704996
+  identification: 
+    name: P3_TC_ADD_INCOTERMS
+    type: Number Field
+
+  label: 
+    label: Add Incoterms
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 330
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ADD_INCOTERMS
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_LC_NO ==============================
+  id: 14881037956704996
+  identification: 
+    name: P3_TC_LC_NO
+    type: Text Field
+
+  label: 
+    label: Lc No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 350
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_LC_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INVOICE_CURRENCY ===================
+  id: 14881473998704996
+  identification: 
+    name: P3_TC_INVOICE_CURRENCY
+    type: Popup LOV
+
+  label: 
+    label: Invoice Currency
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 370
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: 6
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT DISTINCT
+             CER_CONV_FM_CURR_CODE || ' - ' || CURR_ISO_CODE AS DISPLAY_VALUE,
+             CER_CONV_FM_CURR_CODE                           AS RETURN_VALUE
+      FROM HR.TMGT_CARGO_EXG_RATE
+      ORDER BY DISPLAY_VALUE;
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INVOICE_CURRENCY
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INVOICE_NO =========================
+  id: 14881919853704996
+  identification: 
+    name: P3_TC_INVOICE_NO
+    type: Text Field
+
+  label: 
+    label: Invoice No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 390
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: 6
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INVOICE_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_TOTAL_SHIPMENT_VALUE ===============
+  id: 14882314490704997
+  identification: 
+    name: P3_TC_TOTAL_SHIPMENT_VALUE
+    type: Number Field
+
+  label: 
+    label: Total Shipment Value
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 400
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_TOTAL_SHIPMENT_VALUE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_NET_PREMIUM ========================
+  id: 14882632521704997
+  identification: 
+    name: P3_TC_NET_PREMIUM
+    type: Number Field
+
+  label: 
+    label: Net Premium
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 420
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_NET_PREMIUM
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_CERTIFICATE_NO =====================
+  id: 14883055976704997
+  identification: 
+    name: P3_TC_CERTIFICATE_NO
+    type: Text Field
+
+  label: 
+    label: Certificate No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 30
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: true
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CERTIFICATE_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INSURED_ADDRESS ====================
+  id: 14883519206704997
+  identification: 
+    name: P3_TC_INSURED_ADDRESS
+    type: Text Field
+
+  label: 
+    label: Insured Address
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 50
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 200
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INSURED_ADDRESS
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_BENEFICIARY_ADDRESS ================
+  id: 14883861477704997
+  identification: 
+    name: P3_TC_BENEFICIARY_ADDRESS
+    type: Text Field
+
+  label: 
+    label: Beneficiary Address
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 70
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 200
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_BENEFICIARY_ADDRESS
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ISSUANCE_CURRENCY ==================
+  id: 14884239194704998
+  identification: 
+    name: P3_TC_ISSUANCE_CURRENCY
+    type: Popup LOV
+
+  label: 
+    label: Issuance Currency
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 90
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT DISTINCT
+             CER_CONV_FM_CURR_CODE || ' - ' || CURR_ISO_CODE AS DISPLAY_VALUE,
+             CER_CONV_FM_CURR_CODE                           AS RETURN_VALUE
+      FROM HR.TMGT_CARGO_EXG_RATE
+      ORDER BY DISPLAY_VALUE;
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ISSUANCE_CURRENCY
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_COUNTRY_TO =========================
+  id: 14884635527704998
+  identification: 
+    name: P3_TC_COUNTRY_TO
+    type: Select List
+
+  label: 
+    label: Country To
+    alignment: Left
+
+  settings: 
+    page-action-on-selection: None
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 130
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    height: 1
+
+  validation: 
+    value-required: true
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT 
+          DISTINCT 
+          MP_COUNTRY_CODE || ' - ' || COUNTRY, 
+          MP_COUNTRY_CODE 
+      FROM 
+          HR.TMGT_MARINE_PORTS
+      WHERE 
+          COUNTRY IS NOT NULL
+      ORDER BY 
+          1
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_COUNTRY_TO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_PORT_OF_ARRIVAL ====================
+  id: 14885087182704998
+  identification: 
+    name: P3_TC_PORT_OF_ARRIVAL
+    type: Text Field
+
+  label: 
+    label: Port Of Arrival
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 150
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_PORT_OF_ARRIVAL
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FINAL_DESTINATION ==================
+  id: 14885505227704998
+  identification: 
+    name: P3_TC_FINAL_DESTINATION
+    type: Text Field
+
+  label: 
+    label: Final Destination
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 170
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FINAL_DESTINATION
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_VOYAGE_NO ==========================
+  id: 14885837242704998
+  identification: 
+    name: P3_TC_VOYAGE_NO
+    type: Text Field
+
+  label: 
+    label: Voyage No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 190
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_VOYAGE_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_DEPARTURE_DATE =====================
+  id: 14886257326704999
+  identification: 
+    name: P3_TC_DEPARTURE_DATE
+    type: Date Picker
+
+  label: 
+    label: Departure Date
+    alignment: Left
+
+  settings: 
+    show-time: false
+    display-as: Popup
+    minimum-date: None
+    maximum-date: None
+    multiple-months: No
+    use-defaults: true
+
+  layout: 
+    sequence: 210
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    format-mask: DD/MM/RRRR
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_DEPARTURE_DATE
+    data-type: DATE
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_GOODS_DESCRIPTION ==================
+  id: 14886656280704999
+  identification: 
+    name: P3_TC_GOODS_DESCRIPTION
+    type: Text Field
+
+  label: 
+    label: Goods Description
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 230
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_GOODS_DESCRIPTION
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FREIGHT_EX_RATE ====================
+  id: 14887109643704999
+  identification: 
+    name: P3_TC_FREIGHT_EX_RATE
+    type: Number Field
+
+  label: 
+    label: Freight Ex Rate
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 260
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FREIGHT_EX_RATE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_FREIGHT_FINAL ======================
+  id: 14887523464704999
+  identification: 
+    name: P3_TC_FREIGHT_FINAL
+    type: Number Field
+
+  label: 
+    label: Freight Final
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 280
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_FREIGHT_FINAL
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_MBL ================================
+  id: 14887862600704999
+  identification: 
+    name: P3_TC_MBL
+    type: Text Field
+
+  label: 
+    label: Mbl
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 300
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_MBL
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INCO_PREC ==========================
+  id: 14888324885704999
+  identification: 
+    name: P3_TC_INCO_PREC
+    type: Number Field
+
+  label: 
+    label: Inco Prec
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 320
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INCO_PREC
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_INCO_VALUE =========================
+  id: 14888697090705000
+  identification: 
+    name: P3_TC_INCO_VALUE
+    type: Number Field
+
+  label: 
+    label: Inco Value
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 340
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_INCO_VALUE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ACID_NO ============================
+  id: 14889100754705000
+  identification: 
+    name: P3_TC_ACID_NO
+    type: Text Field
+
+  label: 
+    label: Acid No
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 360
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ACID_NO
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_TOTAL_SUM_COVERS ===================
+  id: 14889495891705000
+  identification: 
+    name: P3_TC_TOTAL_SUM_COVERS
+    type: Number Field
+
+  label: 
+    label: Total Sum Covers
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 410
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_TOTAL_SUM_COVERS
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_P_STAMP ============================
+  id: 14889888111705000
+  identification: 
+    name: P3_TC_P_STAMP
+    type: Number Field
+
+  label: 
+    label: P Stamp
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 440
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_P_STAMP
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_CONTRACT_STAMP_DUTY ================
+  id: 14890229405705000
+  identification: 
+    name: P3_TC_CONTRACT_STAMP_DUTY
+    type: Number Field
+
+  label: 
+    label: Contract Stamp Duty
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 450
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CONTRACT_STAMP_DUTY
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_SUP_FEE ============================
+  id: 14890630742705001
+  identification: 
+    name: P3_TC_SUP_FEE
+    type: Number Field
+
+  label: 
+    label: Sup Fee
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 460
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_SUP_FEE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_SERVICE_FEES =======================
+  id: 14891045422705001
+  identification: 
+    name: P3_TC_SERVICE_FEES
+    type: Number Field
+
+  label: 
+    label: Service Fees
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 470
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_SERVICE_FEES
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_P_H_GUARANTEE_FUND =================
+  id: 14891524367705001
+  identification: 
+    name: P3_TC_P_H_GUARANTEE_FUND
+    type: Number Field
+
+  label: 
+    label: P H Guarantee Fund
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 480
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_P_H_GUARANTEE_FUND
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_ISSUE_FEES =========================
+  id: 14891832769705001
+  identification: 
+    name: P3_TC_ISSUE_FEES
+    type: Number Field
+
+  label: 
+    label: Issue Fees
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 490
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_ISSUE_FEES
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_GROSS_PREMIUM ======================
+  id: 14892227386705001
+  identification: 
+    name: P3_TC_GROSS_PREMIUM
+    type: Number Field
+
+  label: 
+    label: Gross Premium
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 430
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 32
+
+  validation: 
+    value-required: false
+    maximum-length: 255
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_GROSS_PREMIUM
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_STATUS =============================
+  id: 14892629888705002
+  identification: 
+    name: P3_TC_STATUS
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 500
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_STATUS
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Static
+    static-value: I
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_CR_USER ============================
+  id: 14893070085705002
+  identification: 
+    name: P3_TC_CR_USER
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 510
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CR_USER
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: ':APP_user'
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_CR_DATE ============================
+  id: 14893519499705002
+  identification: 
+    name: P3_TC_CR_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 520
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_CR_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: "TO_CHAR(SYSDATE, 'DD/MM/RRRR HH:MI:SS AM')"
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_UPD_USER ===========================
+  id: 14893896078705002
+  identification: 
+    name: P3_TC_UPD_USER
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 530
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_UPD_USER
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_UPD_DATE ===========================
+  id: 14894233308705002
+  identification: 
+    name: P3_TC_UPD_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 540
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_UPD_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P3_TC_COVER_RATE =========================
+  id: 15261676777036633
+  identification: 
+    name: P3_TC_COVER_RATE
+    type: Number Field
+
+  label: 
+    label: Cover Rate
+    alignment: Left
+
+  settings: 
+    number-alignment: Start
+    virtual-keyboard: Decimal
+
+  layout: 
+    sequence: 110
+    region: Add/Edit Certificate # 14873526722704991
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    custom-attributes: 
+    - readonly
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: Add/Edit Certificate # 14873526722704991
+    column: TC_COVER_RATE
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+buttons: 
+- # ====== Button: CANCEL ======================================
+  id: 14910651504705009
+  identification: 
+    button-name: CANCEL
+    label: Cancel
+
+  layout: 
+    sequence: 10
+    region: Buttons # 14910278069705008
+    slot: CLOSE
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Defined by Dynamic Action
+    execute-validations: true
+
+- # ====== Button: DELETE ======================================
+  id: 14912082462705009
+  identification: 
+    button-name: DELETE
+    label: Delete
+
+  layout: 
+    sequence: 20
+    region: Buttons # 14910278069705008
+    slot: DELETE
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: false
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL DELETE action
+
+  confirmation: 
+    message: '&APP_TEXT$DELETE_MSG!RAW.'
+    style: Danger
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P3_TC_ID
+
+  configuration: 
+    build-option: Commented Out # 25469441070156667
+
+- # ====== Button: SAVE ========================================
+  id: 14912473552705009
+  identification: 
+    button-name: SAVE
+    label: Apply Changes
+
+  layout: 
+    sequence: 30
+    region: Buttons # 14910278069705008
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL UPDATE action
+
+  server-side-condition: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: |
+      :P3_TC_STATUS <> 'C'
+      AND :P3_TC_ID IS NOT NULL
+
+- # ====== Button: CREATE ======================================
+  id: 14912916750705010
+  identification: 
+    button-name: CREATE
+    label: Create
+
+  layout: 
+    sequence: 40
+    region: Buttons # 14910278069705008
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL INSERT action
+
+  advanced: 
+    static-id: BTN_CREATE
+
+  server-side-condition: 
+    type: Item is NULL
+    item: P3_TC_ID
+
+dynamic-actions: 
+- # ====== Dynamic Action: Appear_INCO =========================
+  id: 11604045808898997
+  identification: 
+    name: Appear_INCO
+
+  execution: 
+    sequence: 40
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_INCO_TERMS
+
+  client-side-condition: 
+    type: Item is not null
+    item: P3_TC_INCO_TERMS
+
+  actions: 
+  - # ====== Action: Show ========================================
+    id: 11604190172898998
+    identification: 
+      action: Show
+
+    affected-elements: 
+      selection-type: Item(s)
+      item(s): 
+      - P3_TC_INCO_PREC
+
+    execution: 
+      sequence: 10
+      event: Appear_INCO # 11604045808898997
+      fire-when-event-result-is: True
+      fire-on-initialization: true
+
+  - # ====== Action: Hide ========================================
+    id: 11604242950898999
+    identification: 
+      action: Hide
+
+    affected-elements: 
+      selection-type: Item(s)
+      item(s): 
+      - P3_TC_INCO_PREC
+
+    execution: 
+      sequence: 10
+      event: Appear_INCO # 11604045808898997
+      fire-when-event-result-is: False
+      fire-on-initialization: true
+
+- # ====== Dynamic Action: DA_SHOW_HIDE_FREIGHT ================
+  id: 14632126522375632
+  identification: 
+    name: DA_SHOW_HIDE_FREIGHT
+
+  execution: 
+    sequence: 20
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_FREIGHT_YN
+
+  client-side-condition: 
+    type: Item = Value
+    item: P3_TC_FREIGHT_YN
+    value: 1
+
+  actions: 
+  - # ====== Action: Show ========================================
+    id: 14632156731375633
+    identification: 
+      action: Show
+
+    affected-elements: 
+      selection-type: Item(s)
+      item(s): 
+      - P3_TC_FREIGHT_CURRENCY
+      - P3_TC_FREIGHT_EX_RATE
+      - P3_TC_FREIGHT_CHARGE
+      - P3_TC_FREIGHT_FINAL
+
+    execution: 
+      sequence: 10
+      event: DA_SHOW_HIDE_FREIGHT # 14632126522375632
+      fire-when-event-result-is: True
+      fire-on-initialization: true
+
+  - # ====== Action: Hide ========================================
+    id: 14632297113375634
+    identification: 
+      action: Hide
+
+    affected-elements: 
+      selection-type: Item(s)
+      item(s): 
+      - P3_TC_FREIGHT_CURRENCY
+      - P3_TC_FREIGHT_EX_RATE
+      - P3_TC_FREIGHT_CHARGE
+      - P3_TC_FREIGHT_FINAL
+
+    execution: 
+      sequence: 10
+      event: DA_SHOW_HIDE_FREIGHT # 14632126522375632
+      fire-when-event-result-is: False
+      fire-on-initialization: true
+
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15049011549125402
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        [
+            "P3_TC_FREIGHT_CURRENCY",
+            "P3_TC_FREIGHT_EX_RATE",
+            "P3_TC_FREIGHT_CHARGE",
+            "P3_TC_FREIGHT_FINAL"
+        ].forEach(function (itemName) {
+            apex.item(itemName).setValue("");
+        });
+
+    execution: 
+      sequence: 20
+      event: DA_SHOW_HIDE_FREIGHT # 14632126522375632
+      fire-when-event-result-is: False
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: Generate Certificate Number =========
+  id: 14632521784375636
+  identification: 
+    name: Generate Certificate Number
+
+  execution: 
+    sequence: 30
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_CONTRACT_NO
+
+  client-side-condition: 
+    type: Item is not null
+    item: P3_TC_CONTRACT_NO
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 14632566664375637
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        (function () {
+            const contractNo = apex.item("P3_TC_CONTRACT_NO").getValue();
+            const createButton = apex.jQuery("#BTN_CREATE");
+        
+            if (!contractNo) {
+                apex.item("P3_TC_CERTIFICATE_NO").setValue("");
+                return;
+            }
+        
+            createButton.prop("disabled", true);
+        
+            apex.item("P3_TC_CERTIFICATE_NO").setValue("");
+        
+            apex.server.process(
+                "GET_NEXT_CERTIFICATE_NO",
+                {
+                    x01: contractNo
+                },
+                {
+                    dataType: "json",
+                    loadingIndicator: "#P3_TC_CERTIFICATE_NO",
+        
+                    success: function (data) {
+                        if (data.success) {
+                            apex.item("P3_TC_CERTIFICATE_NO")
+                                .setValue(data.certificateNo);
+                            apex.item("P3_TC_INSURED_NAME")
+                                .setValue(data.insuredName);
+        
+                            apex.item("P3_TC_INSURED_ADDRESS")
+                                .setValue(data.insuredAddress);
+        
+                            apex.item("P3_TC_COVER_RATE")
+                                .setValue(data.cover_rate || "");
+        
+                            calculateCargoValues();
+                        } else {
+                            apex.item("P3_TC_CERTIFICATE_NO").setValue("");
+                            apex.item("P3_TC_INSURED_NAME").setValue("");
+                            apex.item("P3_TC_INSURED_ADDRESS").setValue("");
+                            apex.item("P3_TC_COVER_RATE").setValue("");
+        
+                            apex.message.alert(
+                                data.message || "Failed to generate certificate number."
+                            );
+                        }
+                    },
+        
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error(jqXHR.responseText);
+        
+                        apex.message.alert(
+                            "Error generating Certificate No: " +
+                            (errorThrown || textStatus)
+                        );
+                    },
+        
+                    complete: function () {
+                        createButton.prop("disabled", false);
+                    }
+                }
+            );
+        })();
+
+    execution: 
+      sequence: 10
+      event: Generate Certificate Number # 14632521784375636
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+  - # ====== Action: Refresh Policy Limit Cards ==================
+    id: 15169091425562693
+    identification: 
+      name: Refresh Policy Limit Cards
+      action: Refresh
+
+    settings: 
+      maintain-pagination: false
+
+    affected-elements: 
+      selection-type: Region
+      region: Policy Limit Summary # 15168884432562691
+
+    execution: 
+      sequence: 20
+      event: Generate Certificate Number # 14632521784375636
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: Cancel Dialog =======================
+  id: 14910820838705009
+  identification: 
+    name: Cancel Dialog
+
+  execution: 
+    sequence: 10
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Click
+    selection-type: Button
+    button: CANCEL # 14910651504705009
+
+  actions: 
+  - # ====== Action: Cancel Dialog ===============================
+    id: 14911552439705009
+    identification: 
+      action: Cancel Dialog
+
+    execution: 
+      sequence: 10
+      event: Cancel Dialog # 14910820838705009
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: Fix Container Floating Label ========
+  id: 15048753088125400
+  identification: 
+    name: Fix Container Floating Label
+
+  execution: 
+    sequence: 50
+    event-scope: Static
+
+  when: 
+    event: Page Load
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15048899382125401
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        (function ($) {
+        
+            const item = document.getElementById(
+                "P3_TC_CONTAINER_NO"
+            );
+        
+            // التوقف بهدوء لو العنصر غير موجود
+            if (!item) {
+                return;
+            }
+        
+            const $item = $(item);
+        
+            const $container = $item.closest(
+                ".t-Form-fieldContainer"
+            );
+        
+            function syncFloatingLabel() {
+        
+                const hasValue =
+                    $.trim($item.val() || "").length > 0;
+        
+                const hasFocus =
+                    document.activeElement === item;
+        
+            
+                $container.toggleClass(
+                    "js-show-label",
+                    hasValue || hasFocus
+                );
+            }
+        
+            $item.off(".containerNoFloating");
+        
+        
+            $item.on(
+                "focusin.containerNoFloating " +
+                "input.containerNoFloating " +
+                "change.containerNoFloating",
+                syncFloatingLabel
+            );
+        
+            $item.on(
+                "focusout.containerNoFloating",
+                function () {
+                    setTimeout(syncFloatingLabel, 0);
+                }
+            );
+        
+         
+            syncFloatingLabel();
+        
+        })(apex.jQuery);
+
+    execution: 
+      sequence: 10
+      event: Fix Container Floating Label # 15048753088125400
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: Get Issuance Exchange Rate ==========
+  id: 15049359665125406
+  identification: 
+    name: Get Issuance Exchange Rate
+
+  execution: 
+    sequence: 60
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_ISSUANCE_CURRENCY
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15049429595125407
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        (function () {
+        
+            const currencyCode = apex.item("P3_TC_ISSUANCE_CURRENCY").getValue();
+            const rateItem = apex.item("P3_TC_ISSUANCE_EX_RATE");
+        
+            if (!currencyCode) {
+                rateItem.setValue("");
+                return;
+            }
+        
+        
+            rateItem.setValue("");
+        
+            apex.server.process(
+                "GET_ISSUANCE_EX_RATE",
+                {
+                    x01: currencyCode
+                },
+                {
+                    dataType: "json",
+                    loadingIndicator: "#P3_TC_ISSUANCE_EX_RATE",
+        
+                    success: function (data) {
+        
+                        if (data.success) {
+        
+                            rateItem.setValue(data.exchangeRate );
+                            calculateCargoValues();  // Added from Mohamed Khaled
+        
+                        } else {
+        
+                            rateItem.setValue("");
+        
+                            apex.message.alert(
+                                data.message ||
+                                "Failed to retrieve exchange rate."
+                            );
+                        }
+                    },
+        
+                    error: function (
+                        jqXHR,
+                        textStatus,
+                        errorThrown
+                    ) {
+                        rateItem.setValue("");
+        
+                        console.error(
+                            jqXHR.responseText
+                        );
+        
+                        apex.message.alert(
+                            "Error retrieving exchange rate: " +
+                            (errorThrown || textStatus)
+                        );
+                    }
+                }
+            );
+        })();
+
+    execution: 
+      sequence: 10
+      event: Get Issuance Exchange Rate # 15049359665125406
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: Calculate Cargo Values ==============
+  id: 15052136598125434
+  identification: 
+    name: Calculate Cargo Values
+
+  execution: 
+    sequence: 70
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_INVOICE_VALUE
+    - ' P3_TC_FREIGHT_YN'
+    - ' P3_TC_FREIGHT_CHARGE'
+    - ' P3_TC_FREIGHT_EX_RATE'
+    - ' P3_TC_INCO_TERMS'
+    - ' P3_TC_INCO_PREC'
+    - ' P3_TC_ISSUANCE_EX_RATE'
+    - ' P3_TC_COVER_RATE'
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15052238717125435
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: calculateCargoValues();
+
+    execution: 
+      sequence: 10
+      event: Calculate Cargo Values # 15052136598125434
+      fire-when-event-result-is: True
+      fire-on-initialization: true
+
+- # ====== Dynamic Action: Get Freight Exchange Rate ===========
+  id: 15168555926562688
+  identification: 
+    name: Get Freight Exchange Rate
+
+  execution: 
+    sequence: 80
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Change
+    selection-type: Item(s)
+    item(s): 
+    - P3_TC_FREIGHT_CURRENCY
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15168675637562689
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        (function () {
+        
+            const freightYN = apex.item("P3_TC_FREIGHT_YN").getValue();
+            const currencyCode = apex.item("P3_TC_FREIGHT_CURRENCY").getValue();
+            const rateItem = apex.item("P3_TC_FREIGHT_EX_RATE");
+        
+            if (freightYN !== "1" || !currencyCode) {
+                rateItem.setValue("");
+        
+                if (typeof calculateCargoValues === "function") {
+                    calculateCargoValues();
+                }
+        
+                return;
+            }
+        
+        
+            rateItem.setValue("");
+        
+            apex.server.process(
+                "GET_FREIGHT_EX_RATE",
+                {
+                    x01: currencyCode
+                },
+                {
+                    dataType: "json",
+        
+                    loadingIndicator: "#P3_TC_FREIGHT_EX_RATE",
+        
+                    success: function (data) {
+        
+                        if (data.success) {
+        
+                            rateItem.setValue(data.exchangeRate);
+        
+                            if (
+                                typeof calculateCargoValues === "function"
+                            ) {
+                                calculateCargoValues();
+                            }
+        
+                        } else {
+        
+                            rateItem.setValue("");
+        
+                            apex.message.alert(
+                                data.message ||
+                                "Failed to retrieve Freight Exchange Rate."
+                            );
+                        }
+                    },
+        
+                    error: function (
+                        jqXHR,
+                        textStatus,
+                        errorThrown
+                    ) {
+                        rateItem.setValue("");
+        
+                        console.error(
+                            jqXHR.responseText
+                        );
+        
+                        apex.message.alert(
+                            "Error retrieving Freight Exchange Rate: "
+                            + (errorThrown || textStatus)
+                        );
+                    }
+                }
+            );
+        
+        })();
+
+    execution: 
+      sequence: 10
+      event: Get Freight Exchange Rate # 15168555926562688
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+validations: 
+- # ====== Validation: Validate Freight Details ================
+  id: 15049152888125404
+  identification: 
+    name: Validate Freight Details
+
+  execution: 
+    sequence: 10
+
+  validation: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: |
+      :P3_TC_FREIGHT_YN = '0'
+      OR
+      (
+             :P3_TC_FREIGHT_CURRENCY IS NOT NULL
+         AND :P3_TC_FREIGHT_EX_RATE  IS NOT NULL
+         AND :P3_TC_FREIGHT_CHARGE   IS NOT NULL
+         AND :P3_TC_FREIGHT_FINAL    IS NOT NULL
+      )
+    always-execute: false
+
+  error: 
+    error-message: |
+      Please enter Freight Currency, Freight Ex Rate,
+      Freight Charge and Freight Final.
+    display-location: Inline with Field and in Notification
+
+- # ====== Validation: CHECK_POLICY_SUM_INSURED_LIMIT ==========
+  id: 15168819776562690
+  identification: 
+    name: CHECK_POLICY_SUM_INSURED_LIMIT
+
+  execution: 
+    sequence: 20
+
+  validation: 
+    type: Function Body (returning Error Text)
+    language: PL/SQL
+    pl/sql-function-body-returning-error-text: |
+      DECLARE
+          L_POLICY_SUM_INSURED  NUMBER := 0;
+          L_PREVIOUS_COVERS     NUMBER := 0;
+          L_CURRENT_COVER       NUMBER := 0;
+          L_TOTAL_AFTER_SAVE    NUMBER := 0;
+          L_REMAINING_AMOUNT    NUMBER := 0;
+      BEGIN
+      
+          L_CURRENT_COVER := NVL(:P3_TC_TOTAL_SUM_COVERS, 0);
+      
+      
+          IF L_CURRENT_COVER <= 0 THEN
+              RETURN
+                  'Total Sum Covers must be calculated before saving.';
+          END IF;
+      
+          SELECT NVL(SUM(SUM_INSURED), 0)
+            INTO L_POLICY_SUM_INSURED
+            FROM HR.TMGT_CARGO_OPEN_COVER
+           WHERE POLH_NO = :P3_TC_CONTRACT_NO
+          --  And EXPIREY_DATE >= TO_CHAR(Sysdate, 'DD/MM/RRRR');
+           And TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE);
+      
+      
+        
+          SELECT NVL(SUM(TC_TOTAL_SUM_COVERS), 0)
+            INTO L_PREVIOUS_COVERS
+            FROM HR.TMGT_CARGO
+           WHERE TC_CONTRACT_NO = :P3_TC_CONTRACT_NO
+             AND NVL(TC_STATUS, 'I') IN ('I', 'C')
+             AND (
+                    :P3_TC_ID IS NULL
+                 OR TC_ID <> :P3_TC_ID
+             );
+      
+          L_TOTAL_AFTER_SAVE := L_PREVIOUS_COVERS + L_CURRENT_COVER;
+      
+          L_REMAINING_AMOUNT := L_POLICY_SUM_INSURED - L_PREVIOUS_COVERS;
+      
+          IF L_POLICY_SUM_INSURED <= 0 THEN
+              RETURN
+                  'No active Sum Insured was found for the selected Contract No.';
+          END IF;
+      
+      
+          
+          IF L_TOTAL_AFTER_SAVE > L_POLICY_SUM_INSURED THEN
+              RETURN
+                    'Certificate cannot be created. '
+                  || 'Policy Sum Insured: '
+                  || TO_CHAR(ROUND(L_POLICY_SUM_INSURED, 2))
+                  || ', Previously Used: '
+                  || TO_CHAR(ROUND(L_PREVIOUS_COVERS, 2))
+                  || ', Remaining: '
+                  || TO_CHAR(
+                         ROUND(
+                             GREATEST(L_REMAINING_AMOUNT, 0),
+                             2
+                         )
+                     )
+                  || ', Current Certificate: '
+                  || TO_CHAR(ROUND(L_CURRENT_COVER, 2))
+                  || '.';
+          END IF;
+      
+      
+          RETURN NULL;
+      END;
+    always-execute: false
+
+  error: 
+    display-location: Inline with Field and in Notification
+
+  server-side-condition: 
+    type: Request is contained in Value
+    value: CREATE,SAVE,APPLY_CHANGES
+
+- # ====== Validation: CHECK_CONTRACT_EXPIRY_DATE ==============
+  id: 15169136110562694
+  identification: 
+    name: CHECK_CONTRACT_EXPIRY_DATE
+
+  execution: 
+    sequence: 30
+
+  validation: 
+    type: Function Body (returning Error Text)
+    language: PL/SQL
+    pl/sql-function-body-returning-error-text: |
+      DECLARE
+          L_EXPIRY_DATE DATE;
+      BEGIN
+          IF :P3_TC_CONTRACT_NO IS NULL THEN
+              RETURN NULL;
+          END IF;
+      
+          SELECT MAX(EXPIREY_DATE)
+            INTO L_EXPIRY_DATE
+            FROM HR.TMGT_CARGO_OPEN_COVER
+           WHERE POLH_NO = :P3_TC_CONTRACT_NO;
+      
+          IF L_EXPIRY_DATE IS NULL THEN
+              RETURN
+                  'Expiry Date was not found for the selected Contract No.';
+          END IF;
+      
+          IF TRUNC(SYSDATE) > TRUNC(L_EXPIRY_DATE) THEN
+              RETURN
+                    'Certificate cannot be created because the contract expired on '
+                  || TO_CHAR(L_EXPIRY_DATE, 'DD/MM/RRRR')
+                  || '.';
+          END IF;
+      
+          RETURN NULL;
+      
+      EXCEPTION
+          WHEN OTHERS THEN
+              RETURN
+                  'Unable to validate the contract expiry date: '
+                  || SQLERRM;
+      END;
+    always-execute: false
+
+  error: 
+    display-location: Inline with Field and in Notification
+    associated-item: P3_TC_CONTRACT_NO # 14874228369704992
+
+  server-side-condition: 
+    when-button-pressed: CREATE # 14912916750705010
+    type: Item is NULL
+    item: P3_TC_ID
+
+processes: 
+- # ====== Process: Initialize form Add/Edit Certificate =======
+  id: 14913269316705010
+  identification: 
+    name: Initialize form Add/Edit Certificate
+    type: Form - Initialization
+    execution-chain: None
+    form-region: Add/Edit Certificate # 14873526722704991
+
+  execution: 
+    sequence: 10
+    point: Before Header
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: Process form Add/Edit Certificate ==========
+  id: 14913717583705010
+  identification: 
+    name: Process form Add/Edit Certificate
+    type: Form - Automatic Row Processing (DML)
+    execution-chain: None
+    form-region: Add/Edit Certificate # 14873526722704991
+
+  settings: 
+    target-type: Region Source
+    prevent-lost-updates: true
+    lock-row: Yes
+    return-primary-key(s)-after-insert: true
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+- # ====== Process: Close Dialog ===============================
+  id: 14914032322705010
+  identification: 
+    name: Close Dialog
+    type: Close Dialog
+    execution-chain: None
+
+  settings: 
+    show-success-messages: true
+
+  execution: 
+    sequence: 50
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    type: Request is contained in Value
+    value: CREATE,SAVE,DELETE
+
+- # ====== Process: GET_NEXT_CERTIFICATE_NO ====================
+  id: 15047607654125388
+  identification: 
+    name: GET_NEXT_CERTIFICATE_NO
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_CONTRACT_NO      VARCHAR2(100);
+          L_COUNTER          NUMBER;
+          L_CERTIFICATE_NO   VARCHAR2(200);
+          L_INSURED_NAME     VARCHAR2(4000);
+          L_INSURED_ADDRESS  VARCHAR2(4000);
+          L_COVER_RATE       NUMBER;
+      BEGIN
+          L_CONTRACT_NO := TRIM(APEX_APPLICATION.G_X01);
+      
+          IF L_CONTRACT_NO IS NULL THEN
+              RAISE_APPLICATION_ERROR(
+                  -20001,
+                  'Contract No is required.'
+              );
+          END IF;
+      
+          SELECT INSURED_NAME,
+                 INSURED_ADDRESS,
+                 COVER_RATE
+            INTO L_INSURED_NAME,
+                 L_INSURED_ADDRESS,
+                 L_COVER_RATE
+            FROM HR.TMGT_CARGO_OPEN_COVER
+           WHERE POLH_NO = L_CONTRACT_NO
+             AND TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE)
+           FETCH FIRST 1 ROW ONLY;
+      
+          L_COUNTER :=
+              HR.FN_GET_NEXT_CERTIFICATE_NO(
+                  P_OPEN_COVER => L_CONTRACT_NO
+              );
+      
+          L_CERTIFICATE_NO :=
+              L_CONTRACT_NO
+              || '-'
+              || TO_CHAR(L_COUNTER);
+      
+          COMMIT;
+      
+          APEX_JSON.OPEN_OBJECT;
+          APEX_JSON.WRITE('success', TRUE);
+          APEX_JSON.WRITE('certificateNo', L_CERTIFICATE_NO);
+          APEX_JSON.WRITE('insuredName',  L_INSURED_NAME);
+          APEX_JSON.WRITE('insuredAddress', L_INSURED_ADDRESS);
+          APEX_JSON.WRITE('cover_rate', L_COVER_RATE);
+          APEX_JSON.CLOSE_OBJECT;
+      
+      EXCEPTION
+          WHEN OTHERS THEN
+              ROLLBACK;
+      
+              APEX_JSON.OPEN_OBJECT;
+              APEX_JSON.WRITE('success', FALSE);
+              APEX_JSON.WRITE('message', SQLERRM);
+              APEX_JSON.CLOSE_OBJECT;
+      END;
+
+  execution: 
+    sequence: 10
+    point: Ajax Callback
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: GET_ISSUANCE_EX_RATE =======================
+  id: 15049288911125405
+  identification: 
+    name: GET_ISSUANCE_EX_RATE
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_CURRENCY_CODE VARCHAR2(100);
+          L_EX_RATE       NUMBER;
+      BEGIN
+          L_CURRENCY_CODE :=
+              TRIM(APEX_APPLICATION.G_X01);
+      
+          IF L_CURRENCY_CODE IS NULL THEN
+              RAISE_APPLICATION_ERROR(
+                  -20001,
+                  'Issuance Currency is required.'
+              );
+          END IF;
+      
+          SELECT CER_EXG_RATE
+            INTO L_EX_RATE
+            FROM
+            (
+                SELECT CER_EXG_RATE
+                  FROM HR.TMGT_CARGO_EXG_RATE
+                 WHERE CER_CONV_FM_CURR_CODE = L_CURRENCY_CODE
+                   AND TRUNC(SYSDATE) >= TRUNC(CER_EFF_FRM_DT)
+                   AND TRUNC(SYSDATE) <= TRUNC( CER_EFF_TO_DT)
+      
+                 ORDER BY CER_EFF_FRM_DT DESC
+            )
+           WHERE ROWNUM = 1;
+      
+          APEX_JSON.OPEN_OBJECT;
+          APEX_JSON.WRITE('success', TRUE);
+          APEX_JSON.WRITE('exchangeRate', L_EX_RATE);
+          APEX_JSON.CLOSE_OBJECT;
+      
+      EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+      
+              APEX_JSON.OPEN_OBJECT;
+      
+              APEX_JSON.WRITE('success', FALSE);
+              APEX_JSON.WRITE('message', 'No active exchange rate was found for the selected currency.');
+      
+              APEX_JSON.CLOSE_OBJECT;
+      
+          WHEN OTHERS THEN
+      
+              APEX_JSON.OPEN_OBJECT;
+      
+              APEX_JSON.WRITE('success', FALSE);
+      
+              APEX_JSON.WRITE('message', SQLERRM);
+      
+              APEX_JSON.CLOSE_OBJECT;
+      END;
+
+  execution: 
+    sequence: 20
+    point: Ajax Callback
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: CALCULATE_CARGO_VALUES =====================
+  id: 15052328910125436
+  identification: 
+    name: CALCULATE_CARGO_VALUES
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_FREIGHT_FINAL          NUMBER;
+          L_ADD_INCOTERMS          NUMBER;
+          L_INCO_VALUE             NUMBER;
+          L_TOTAL_SHIPMENT_VALUE   NUMBER;
+          L_TOTAL_SUM_COVERS       NUMBER;
+          L_NET_PREMIUM            NUMBER;
+          L_P_STAMP                NUMBER;
+          L_CONTRACT_STAMP         NUMBER;
+          L_SUP_FEE                NUMBER;
+          L_SERVICE_FEES           NUMBER;
+          L_GUARANTEE_FUND         NUMBER;
+          L_ISSUE_FEES             NUMBER;
+          L_GROSS_PREMIUM          NUMBER;
+      BEGIN
+          HR.PKG_CARGO_CALC.CALCULATE
+          (
+              P_INVOICE_VALUE        => NVL(:P3_TC_INVOICE_VALUE, 0),
+              P_FREIGHT_YN           => NVL(:P3_TC_FREIGHT_YN, '0'),
+              P_FREIGHT_CHARGE       => NVL(:P3_TC_FREIGHT_CHARGE, 0),
+              P_FREIGHT_EX_RATE      => NVL(:P3_TC_FREIGHT_EX_RATE, 0),
+              P_INCO_TERMS           => :P3_TC_INCO_TERMS,
+              P_INCO_PREC            => NVL(:P3_TC_INCO_PREC, 0),
+              P_ISSUANCE_EX_RATE     => NVL(:P3_TC_ISSUANCE_EX_RATE, 0),
+              P_COVER_RATE           => NVL(:P3_TC_COVER_RATE, 0),
+              O_FREIGHT_FINAL        => L_FREIGHT_FINAL,
+              O_ADD_INCOTERMS        => L_ADD_INCOTERMS,
+              O_INCO_VALUE           => L_INCO_VALUE,
+              O_TOTAL_SHIPMENT_VALUE => L_TOTAL_SHIPMENT_VALUE,
+              O_TOTAL_SUM_COVERS     => L_TOTAL_SUM_COVERS,
+              O_NET_PREMIUM          => L_NET_PREMIUM,
+              O_P_STAMP              => L_P_STAMP,
+              O_CONTRACT_STAMP       => L_CONTRACT_STAMP,
+              O_SUP_FEE              => L_SUP_FEE,
+              O_SERVICE_FEES         => L_SERVICE_FEES,
+              O_GUARANTEE_FUND       => L_GUARANTEE_FUND,
+              O_ISSUE_FEES           => L_ISSUE_FEES,
+              O_GROSS_PREMIUM        => L_GROSS_PREMIUM
+          );
+      
+          APEX_JSON.OPEN_OBJECT;
+      
+          APEX_JSON.WRITE('success', TRUE);
+          APEX_JSON.WRITE('freightFinal', L_FREIGHT_FINAL);
+          APEX_JSON.WRITE('addIncoterms', L_ADD_INCOTERMS);
+          APEX_JSON.WRITE('incoValue', L_INCO_VALUE);
+          APEX_JSON.WRITE('totalShipmentValue', L_TOTAL_SHIPMENT_VALUE);
+          APEX_JSON.WRITE('totalSumCovers', L_TOTAL_SUM_COVERS);
+          APEX_JSON.WRITE('netPremium', L_NET_PREMIUM);
+          APEX_JSON.WRITE('proportionalStamp', L_P_STAMP);
+          APEX_JSON.WRITE('contractStamp', L_CONTRACT_STAMP);
+          APEX_JSON.WRITE('supervisionFee', L_SUP_FEE);
+          APEX_JSON.WRITE('serviceFees', L_SERVICE_FEES);
+          APEX_JSON.WRITE('guaranteeFund', L_GUARANTEE_FUND);
+          APEX_JSON.WRITE('issueFees', L_ISSUE_FEES);
+          APEX_JSON.WRITE('grossPremium', L_GROSS_PREMIUM);
+          APEX_JSON.CLOSE_OBJECT;
+      
+      EXCEPTION
+          WHEN OTHERS THEN
+              APEX_JSON.OPEN_OBJECT;
+              APEX_JSON.WRITE('success', FALSE);
+              APEX_JSON.WRITE('message', SQLERRM);
+              APEX_JSON.CLOSE_OBJECT;
+      END;
+
+  execution: 
+    sequence: 30
+    point: Ajax Callback
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: GET_FREIGHT_EX_RATE ========================
+  id: 15052492321125437
+  identification: 
+    name: GET_FREIGHT_EX_RATE
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_CURRENCY_CODE VARCHAR2(100);
+          L_EX_RATE       NUMBER;
+      BEGIN
+          L_CURRENCY_CODE := TRIM(APEX_APPLICATION.G_X01);
+      
+          IF L_CURRENCY_CODE IS NULL THEN
+              RAISE_APPLICATION_ERROR(
+                  -20001,
+                  'Freight Currency is required.'
+              );
+          END IF;
+      
+          SELECT CER_EXG_RATE
+            INTO L_EX_RATE
+            FROM
+            (
+                SELECT CER_EXG_RATE
+                  FROM HR.TMGT_CARGO_EXG_RATE
+                 WHERE CER_CONV_FM_CURR_CODE = L_CURRENCY_CODE
+                   AND TRUNC(SYSDATE) >= TRUNC(CER_EFF_FRM_DT)
+                   AND TRUNC(SYSDATE) <= TRUNC(CER_EFF_TO_DT)
+                 ORDER BY CER_EFF_FRM_DT DESC
+            )
+           WHERE ROWNUM = 1;
+      
+          APEX_JSON.OPEN_OBJECT;
+      
+          APEX_JSON.WRITE('success',TRUE);
+          APEX_JSON.WRITE('exchangeRate', L_EX_RATE);
+      
+          APEX_JSON.CLOSE_OBJECT;
+      
+      EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+              APEX_JSON.OPEN_OBJECT;
+      
+              APEX_JSON.WRITE('success', FALSE);
+              APEX_JSON.WRITE('message', 'No active exchange rate was found for the selected Freight Currency.');
+      
+              APEX_JSON.CLOSE_OBJECT;
+      
+          WHEN OTHERS THEN
+              APEX_JSON.OPEN_OBJECT;
+              APEX_JSON.WRITE('success', FALSE);
+              APEX_JSON.WRITE('message', SQLERRM);
+      
+              APEX_JSON.CLOSE_OBJECT;
+      END;
+
+  execution: 
+    sequence: 40
+    point: Ajax Callback
+    run-process: Once Per Page Visit (default)
+

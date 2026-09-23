@@ -1,0 +1,46 @@
+---
+- # ====== Authentication: Application Express Accounts ========
+  id: 25469768755156668
+  identification: 
+    name: Application Express Accounts
+
+  subscription: 
+    version-number: 4861909
+
+  settings: 
+    type: Custom
+    authentication-function-name: CHECK_USER
+    enable-legacy-authentication-attributes: false
+
+  source: 
+    pl/sql-code: |
+      Function CHECK_USER(p_username varchar2,
+                          p_password varchar2)
+      return boolean
+      As 
+          V_Number Number;
+      Begin 
+          Select 1
+          Into V_Number
+          From HR.TMGT_CARGO_USER
+          Where UPPER(TCU_NAME) =  UPPER(p_username)
+          And TCU_PASSWORD = HR.encrypt(p_password);
+      
+          IF V_Number = 1 then 
+              return true;
+          Else 
+              return false;
+          End IF;
+      
+      
+      End;
+
+  session-not-valid: 
+    redirect-to: Login Page
+
+  login-processing: 
+    switch-in-session: false
+
+  real-application-security: 
+    ras-mode: Disabled
+

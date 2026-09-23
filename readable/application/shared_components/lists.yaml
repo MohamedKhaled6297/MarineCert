@@ -1,0 +1,416 @@
+---
+- # ====== List: Navigation Menu ===============================
+  id: 25470540857156675
+  identification: 
+    name: Navigation Menu
+
+  subscription: 
+    version-number: 4885004
+
+  source: 
+    type: Static Values
+
+  entries: 
+  - # ====== Entry: Master Data ==================================
+    id: 6228318158402056
+    label: 
+      label: Master Data
+
+    icon: 
+      image/icon-css-classes: fa-database-arrow-up
+
+    layout: 
+      sequence: 15
+
+    is-current: 
+      type: Target Page
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Cargo Open Cover =============================
+    id: 6244576195822890
+    label: 
+      label: Cargo Open Cover
+
+    icon: 
+      image/icon-css-classes: fa-ai-sparkle-generate-document
+
+    layout: 
+      sequence: 200
+      parent-entry: Master Data # 6228318158402056
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 8
+      - 9
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:8:&SESSION.::&DEBUG.::::'
+        page: 8 # Cargo Open Cover
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Exchange Rates ===============================
+    id: 6269803509976728
+    label: 
+      label: Exchange Rates
+
+    icon: 
+      image/icon-css-classes: fa-strategy
+
+    layout: 
+      sequence: 210
+      parent-entry: Master Data # 6228318158402056
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 10
+      - 11
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:::'
+        page: 10 # Exchange Rates
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Marine Ports =================================
+    id: 6285616845984043
+    label: 
+      label: Marine Ports
+
+    icon: 
+      image/icon-css-classes: fa-ambulance
+
+    layout: 
+      sequence: 220
+      parent-entry: Master Data # 6228318158402056
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 12
+      - 13
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:12:&APP_SESSION.::&DEBUG.:::'
+        page: 12 # Marine Ports
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Certificate ==================================
+    id: 14801579988632324
+    label: 
+      label: Certificate
+
+    icon: 
+      image/icon-css-classes: fa-certificate
+
+    layout: 
+      sequence: 20
+
+    is-current: 
+      type: Target Page
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Certificate ==================================
+    id: 14914680548705010
+    label: 
+      label: Certificate
+
+    icon: 
+      image/icon-css-classes: fa-certificate
+
+    layout: 
+      sequence: 180
+      parent-entry: Certificate # 14801579988632324
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 2
+      - 3
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:2:&APP_SESSION.::&DEBUG.:::'
+        page: 2 # Certificate
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Certificate Reports ==========================
+    id: 15196642029989401
+    label: 
+      label: Certificate Reports
+
+    icon: 
+      image/icon-css-classes: fa-print
+
+    layout: 
+      sequence: 26
+      parent-entry: Reports # 19172729423704696
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 6
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:6:&SESSION.::&DEBUG.:6:::'
+        page: 6 # Certificate Reports
+        clear-cache: 6
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Certificate Bulk Upload ======================
+    id: 15251339332711223
+    label: 
+      label: Certificate Bulk Upload
+
+    icon: 
+      image/icon-css-classes: fa-upload
+
+    layout: 
+      sequence: 190
+      parent-entry: Certificate # 14801579988632324
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 7
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:::'
+        page: 7 # Certificate Bulk Upload
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Reports ======================================
+    id: 19172729423704696
+    label: 
+      label: Reports
+
+    icon: 
+      image/icon-css-classes: fa-server-file
+
+    layout: 
+      sequence: 25
+
+    is-current: 
+      type: Target Page
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: User Login Page ==============================
+    id: 19329786476123531
+    label: 
+      label: User Login Page
+
+    icon: 
+      image/icon-css-classes: fa-sign-in
+
+    layout: 
+      sequence: 170
+      parent-entry: Admin # 20894845999249922
+
+    is-current: 
+      type: Pages
+      pages: 
+      - 4
+      - 5
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:4:&APP_SESSION.::&DEBUG.:::'
+        page: 4 # User Login Page
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Admin ========================================
+    id: 20894845999249922
+    label: 
+      label: Admin
+
+    icon: 
+      image/icon-css-classes: fa-thumbs-up
+
+    layout: 
+      sequence: 30
+
+    is-current: 
+      type: Target Page
+
+    user-defined-attributes: 
+      translatable: false
+
+    security: 
+      authorization-scheme: ADMIN_AUTH # 19371322376177471
+
+  - # ====== Entry: Home =========================================
+    id: 25666608216156912
+    label: 
+      label: Home
+
+    icon: 
+      image/icon-css-classes: fa-home
+
+    layout: 
+      sequence: 10
+
+    is-current: 
+      type: Target Page
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:1:&APP_SESSION.::&DEBUG.:'
+        page: 1 # Home
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+- # ====== List: Navigation Bar ================================
+  id: 25657837647156843
+  identification: 
+    name: Navigation Bar
+
+  subscription: 
+    version-number: 4586154
+
+  source: 
+    type: Static Values
+
+  entries: 
+  - # ====== Entry: Install App ==================================
+    id: 25668125319156934
+    label: 
+      label: Install App
+
+    icon: 
+      image/icon-css-classes: fa-cloud-download
+
+    layout: 
+      sequence: 10
+
+    is-current: 
+      type: Never
+
+    link: 
+      target: '#'
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+      2.: a-pwaInstall
+
+  - # ====== Entry: &APP_USER. ===================================
+    id: 25668411879156934
+    label: 
+      label: '&APP_USER.'
+
+    icon: 
+      image/icon-css-classes: fa-user
+
+    layout: 
+      sequence: 20
+
+    is-current: 
+      type: Target Page
+
+    link: 
+      target: '#'
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+      2.: has-username
+
+  - # ====== Entry: --- ==========================================
+    id: 25668924338156934
+    label: 
+      label: '---'
+
+    layout: 
+      sequence: 30
+      parent-entry: '&APP_USER.' # 25668411879156934
+
+    is-current: 
+      type: Target Page
+
+    link: 
+      target: separator
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+
+  - # ====== Entry: Sign Out =====================================
+    id: 25669383924156934
+    label: 
+      label: Sign Out
+
+    icon: 
+      image/icon-css-classes: fa-sign-out
+
+    layout: 
+      sequence: 40
+      parent-entry: '&APP_USER.' # 25668411879156934
+
+    is-current: 
+      type: Target Page
+
+    link: 
+      target: '&LOGOUT_URL.'
+
+    click-counting: 
+      count-clicks: false
+
+    user-defined-attributes: 
+      translatable: false
+

@@ -1,0 +1,119 @@
+---
+- # ====== Breadcrumb: Breadcrumb ==============================
+  id: 25470073129156670
+  identification: 
+    name: Breadcrumb
+
+  entries: 
+  - # ====== Entry: Cargo Open Cover =============================
+    id: 6250468535822937
+    identification: 
+      name: Cargo Open Cover
+      page-number: 8
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:8:&APP_SESSION.::&DEBUG.:::'
+        page: 8 # Cargo Open Cover
+
+  - # ====== Entry: Exchange Rates ===============================
+    id: 6275024374976740
+    identification: 
+      name: Exchange Rates
+      page-number: 10
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:10:&APP_SESSION.::&DEBUG.:::'
+        page: 10 # Exchange Rates
+
+  - # ====== Entry: Marine Ports =================================
+    id: 6290491252984053
+    identification: 
+      name: Marine Ports
+      page-number: 12
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:12:&APP_SESSION.::&DEBUG.:::'
+        page: 12 # Marine Ports
+
+  - # ====== Entry: Certificate ==================================
+    id: 14938315282705021
+    identification: 
+      name: Certificate
+      page-number: 2
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:2:&APP_SESSION.::&DEBUG.:::'
+        page: 2 # Certificate
+
+  - # ====== Entry: Certificate Reports ==========================
+    id: 15197601891989406
+    identification: 
+      name: Certificate Reports
+      page-number: 6
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:6:&APP_SESSION.::&DEBUG.:::'
+        page: 6 # Certificate Reports
+
+  - # ====== Entry: Certificate Bulk Upload ======================
+    id: 15252322702711224
+    identification: 
+      name: Certificate Bulk Upload
+      page-number: 7
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:7:&APP_SESSION.::&DEBUG.:::'
+        page: 7 # Certificate Bulk Upload
+
+  - # ====== Entry: User Login Page ==============================
+    id: 19336526948123536
+    identification: 
+      name: User Login Page
+      page-number: 4
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:4:&APP_SESSION.::&DEBUG.:::'
+        page: 4 # User Login Page
+
+  - # ====== Entry: Home =========================================
+    id: 25470232978156672
+    identification: 
+      name: Home
+      page-number: 1
+
+    execution: 
+      sequence: 10
+
+    link: 
+      target: 
+        url: 'f?p=&APP_ID.:1:&APP_SESSION.::&DEBUG.'
+        page: 1 # Home
+

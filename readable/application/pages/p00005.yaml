@@ -1,0 +1,959 @@
+---
+# ====== Page: User Login Page form ==========================
+id: 5
+identification: 
+  name: User Login Page form
+  alias: USER-LOGIN-PAGE-FORM
+  title: User Login Page form
+
+appearance: 
+  page-mode: Modal Dialog
+  dialog-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+
+dialog: 
+  chained: false
+  resizable: true
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: User Login Page form ========================
+  id: 19318024604123525
+  identification: 
+    name: User Login Page form
+    type: Form
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: TMGT_CARGO_USER
+    include-rowid-column: false
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    edit: 
+      enabled: true
+      allowed-operations: 
+      - Add Row
+      - Update Row
+      - Delete Row
+      lost-update-type: Row Values
+
+- # ====== Region: Buttons =====================================
+  id: 19325308646123529
+  identification: 
+    name: Buttons
+    type: Static Content
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: REGION_POSITION_03
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Buttons Container
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: Text (escape special characters)
+      show-line-breaks: true
+
+page-items: 
+- # ====== Page Item: P5_TCU_ID ================================
+  id: 15050922793125421
+  identification: 
+    name: P5_TCU_ID
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 10
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_ID
+    data-type: NUMBER
+    query-only: true
+    primary-key: true
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Checksum Required - Session Level
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_NAME ==============================
+  id: 15051023321125422
+  identification: 
+    name: P5_TCU_NAME
+    type: Text Field
+
+  label: 
+    label: User Name
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 20
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: true
+    maximum-length: 100
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_NAME
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_PASSWORD ==========================
+  id: 15051030511125423
+  identification: 
+    name: P5_TCU_PASSWORD
+    type: Text Field
+
+  label: 
+    label: Password
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 30
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: true
+    maximum-length: 3000
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_PASSWORD
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_EMAIL =============================
+  id: 15051158970125424
+  identification: 
+    name: P5_TCU_EMAIL
+    type: Text Field
+
+  label: 
+    label: Email
+    alignment: Left
+
+  settings: 
+    subtype: Text
+    trim-spaces: Leading and Trailing
+    text-case: NO CHANGE
+    submit-when-enter-pressed: false
+    disabled: false
+
+  layout: 
+    sequence: 40
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: true
+    maximum-length: 500
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_EMAIL
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_OTP_ID ============================
+  id: 15051291772125425
+  identification: 
+    name: P5_TCU_OTP_ID
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 50
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_OTP_ID
+    data-type: NUMBER
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_OTP_CODE ==========================
+  id: 15051406618125426
+  identification: 
+    name: P5_TCU_OTP_CODE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 60
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_OTP_CODE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_OTP_SENT_DATE =====================
+  id: 15051513157125427
+  identification: 
+    name: P5_TCU_OTP_SENT_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 70
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_OTP_SENT_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_OTP_IS_VAILD ======================
+  id: 15051559087125428
+  identification: 
+    name: P5_TCU_OTP_IS_VAILD
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 80
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_OTP_IS_VAILD
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_SESSION_ID ========================
+  id: 15051697674125429
+  identification: 
+    name: P5_TCU_SESSION_ID
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 90
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_SESSION_ID
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_LOCK ==============================
+  id: 15051744107125430
+  identification: 
+    name: P5_TCU_LOCK
+    type: Switch
+
+  label: 
+    label: Lock
+    alignment: Left
+
+  settings: 
+    use-defaults: false
+    on-value: Y
+    off-value: N
+
+  layout: 
+    sequence: 110
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_LOCK
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Static
+    static-value: N
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P5_TCU_ID
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_LOCK_DATE =========================
+  id: 15051839558125431
+  identification: 
+    name: P5_TCU_LOCK_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 120
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_LOCK_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P5_TCU_ID
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_CR ================================
+  id: 15051947539125432
+  identification: 
+    name: P5_TCU_CR
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 130
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_CR
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: ':APP_user'
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_CR_DATE ===========================
+  id: 15052034394125433
+  identification: 
+    name: P5_TCU_CR_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 140
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_CR_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: "TO_CHAR(SYSDATE, 'DD/MM/RRRR HH:MI:SS AM')"
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_ADMIN_AUTH ========================
+  id: 15171030144562713
+  identification: 
+    name: P5_TCU_ADMIN_AUTH
+    type: Switch
+
+  label: 
+    label: Admin Auth
+    alignment: Left
+
+  settings: 
+    use-defaults: false
+    on-value: Y
+    off-value: N
+
+  layout: 
+    sequence: 100
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Required - Floating
+    template-options: 
+    - '#DEFAULT#'
+
+  validation: 
+    value-required: false
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_ADMIN_AUTH
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  default: 
+    type: Static
+    static-value: N
+
+  session-state: 
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+buttons: 
+- # ====== Button: CANCEL ======================================
+  id: 19325757849123530
+  identification: 
+    button-name: CANCEL
+    label: Cancel
+
+  layout: 
+    sequence: 10
+    region: Buttons # 19325308646123529
+    slot: CLOSE
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Defined by Dynamic Action
+    execute-validations: true
+
+- # ====== Button: DELETE ======================================
+  id: 19327104519123530
+  identification: 
+    button-name: DELETE
+    label: Delete
+
+  layout: 
+    sequence: 20
+    region: Buttons # 19325308646123529
+    slot: DELETE
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: false
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL DELETE action
+
+  confirmation: 
+    message: '&APP_TEXT$DELETE_MSG!RAW.'
+    style: Danger
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P5_TCU_ID
+
+  configuration: 
+    build-option: Commented Out # 25469441070156667
+
+- # ====== Button: SAVE ========================================
+  id: 19327508663123530
+  identification: 
+    button-name: SAVE
+    label: Apply Changes
+
+  layout: 
+    sequence: 30
+    region: Buttons # 19325308646123529
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL UPDATE action
+
+  server-side-condition: 
+    type: Item is NOT NULL
+    item: P5_TCU_ID
+
+- # ====== Button: CREATE ======================================
+  id: 19327955472123531
+  identification: 
+    button-name: CREATE
+    label: Create
+
+  layout: 
+    sequence: 40
+    region: Buttons # 19325308646123529
+    slot: NEXT
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+    database-action: SQL INSERT action
+
+  server-side-condition: 
+    type: Item is NULL
+    item: P5_TCU_ID
+
+dynamic-actions: 
+- # ====== Dynamic Action: Cancel Dialog =======================
+  id: 19325817552123530
+  identification: 
+    name: Cancel Dialog
+
+  execution: 
+    sequence: 10
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Click
+    selection-type: Button
+    button: CANCEL # 19325757849123530
+
+  actions: 
+  - # ====== Action: Cancel Dialog ===============================
+    id: 19326633351123530
+    identification: 
+      action: Cancel Dialog
+
+    execution: 
+      sequence: 10
+      event: Cancel Dialog # 19325817552123530
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+processes: 
+- # ====== Process: Initialize form User Login Page form =======
+  id: 19328339383123531
+  identification: 
+    name: Initialize form User Login Page form
+    type: Form - Initialization
+    execution-chain: None
+    form-region: User Login Page form # 19318024604123525
+
+  execution: 
+    sequence: 10
+    point: Before Header
+    run-process: Once Per Page Visit (default)
+
+- # ====== Process: Process form User Login Page form ==========
+  id: 19328760123123531
+  identification: 
+    name: Process form User Login Page form
+    type: Form - Automatic Row Processing (DML)
+    execution-chain: None
+    form-region: User Login Page form # 19318024604123525
+
+  settings: 
+    target-type: Region Source
+    prevent-lost-updates: true
+    lock-row: Yes
+    return-primary-key(s)-after-insert: true
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+- # ====== Process: Close Dialog ===============================
+  id: 19329124910123531
+  identification: 
+    name: Close Dialog
+    type: Close Dialog
+    execution-chain: None
+
+  settings: 
+    show-success-messages: true
+
+  execution: 
+    sequence: 50
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    type: Request is contained in Value
+    value: CREATE,SAVE,DELETE
+

@@ -1,0 +1,80 @@
+---
+- # ====== List of Values: TMGT_REQ_BROKER.REQ_BK ==============
+  id: 18763556712709497
+  identification: 
+    name: TMGT_REQ_BROKER.REQ_BK
+
+  subscription: 
+    version-number: 4586862
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: TMGT_REQ_BROKER
+
+  column-mapping: 
+    return: REQ_BK_ID
+    display: REQ_BK
+    default-sort: REQ_BK
+    sort-direction: Ascending (Nulls Last)
+
+- # ====== List of Values: TMGT_BROKER.BROKER_NAME =============
+  id: 20641898146394563
+  identification: 
+    name: TMGT_BROKER.BROKER_NAME
+
+  subscription: 
+    version-number: 7471915
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: TMGT_BROKER
+
+  column-mapping: 
+    return: BROKER_ID
+    display: BROKER_NAME
+    default-sort: BROKER_NAME
+    sort-direction: Ascending (Nulls Last)
+
+- # ====== List of Values: TMGT_SURVEY.SURVEY_STATUS ===========
+  id: 20853406864024402
+  identification: 
+    name: TMGT_SURVEY.SURVEY_STATUS
+
+  subscription: 
+    version-number: 7718363
+
+  source: 
+    location: Local Database
+    type: Table / View
+    table-owner: Parsing Schema
+    table-name: TMGT_SURVEY
+
+  column-mapping: 
+    return: SURVEY_ID
+    display: SURVEY_STATUS
+    default-sort: SURVEY_STATUS
+    sort-direction: Ascending (Nulls Last)
+
+- # ====== List of Values: LOGIN_REMEMBER_USERNAME =============
+  id: 25663007388156900
+  identification: 
+    name: LOGIN_REMEMBER_USERNAME
+
+  subscription: 
+    version-number: 4586167
+
+  source: 
+    location: Static Values
+
+  entries: 
+  - # ====== Entry: Remember username ============================
+    id: 25663379245156901
+    entry: 
+      sequence: 10
+      display: Remember username
+      return: Y
+

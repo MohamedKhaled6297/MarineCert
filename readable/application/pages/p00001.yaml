@@ -1,0 +1,2027 @@
+---
+# ====== Page: Home ==========================================
+id: 1
+identification: 
+  name: Home
+  alias: HOME
+  title: Home
+
+appearance: 
+  page-mode: Normal
+  page-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+css: 
+  inline: |
+    .t-HeroRegion-icon{
+        background-color: white;
+    }
+    
+    /* Change Card Body Background */
+    .a-CardView-body {
+    
+        color: #d3af20 !important;
+        font-weight: bold;
+    }
+    
+    
+    /* Make the circle perfectly centered */
+    .a-CardView-initials {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    
+    
+    
+    
+    
+    /**************************************************/
+    /* Status badges */
+    .cargo-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 92px;
+        padding: 5px 14px;
+        border: 1px solid;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    
+    .cargo-status--accepted {
+        color: #26763a;
+        background: #ecf9ef;
+        border-color: #82cc90;
+    }
+    
+    .cargo-status--incomplete {
+        color: #8a5b00;
+        background: #fff8e1;
+        border-color: #ffc84d;
+    }
+    
+    .cargo-status--rejected {
+        color: #c62828;
+        background: #fff0f0;
+        border-color: #ff9d9d;
+    }
+    
+    
+    /* Action buttons */
+    .cargo-action {
+        min-width: 82px;
+        padding: 7px 13px;
+        border: 1px solid;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+    }
+    
+    .cargo-action:hover {
+        opacity: 0.82;
+    }
+    
+    .cargo-action--approve {
+        color: #ffffff;
+        background: #2e8540;
+        border-color: #2e8540;
+    }
+    
+    .cargo-action--reject {
+        color: #ffffff;
+        background: #d32f2f;
+        border-color: #d32f2f;
+    }
+    
+    
+    
+    
+    
+    /* For Header */
+    
+    
+    .marinecert-home-hero{
+        display:flex;
+        align-items:center;
+        gap:28px;
+        padding:30px 20px;
+        flex-wrap:wrap;
+    }
+    
+    .marinecert-home-logo{
+        width:130px;
+        max-width:100%;
+        height:auto;
+        display:block;
+    }
+    
+    .marinecert-home-text h1{
+        margin:0 0 18px 0;
+        font-size:32px;
+        font-weight:700;
+        color:#000;
+    }
+    
+    .marinecert-home-text h2{
+        margin:0;
+        font-size:28px;
+        font-weight:700;
+        color:#000;
+    }
+    
+    @media (max-width: 768px){
+        .marinecert-home-hero{
+            gap:18px;
+            padding:20px 10px;
+        }
+    
+        .marinecert-home-logo{
+            width:100px;
+        }
+    
+        .marinecert-home-text h1{
+            font-size:24px;
+        }
+    
+        .marinecert-home-text h2{
+            font-size:22px;
+        }
+    }
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Certificate Summary =========================
+  id: 15257227512036589
+  identification: 
+    name: Certificate Summary
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      Select *
+      From 
+      (SELECT 1 AS SORT_ORDER,
+             'Total Certificates' AS CARD_TITLE,
+             TO_CHAR(COUNT(*)) AS CARD_VALUE,
+             'fa-file-text-o' AS CARD_ICON
+        FROM HR.TMGT_CARGO
+      UNION ALL
+      SELECT 2,
+             'Incomplete',
+             TO_CHAR(COUNT(*)),
+             'fa-clock-o'
+        FROM HR.TMGT_CARGO
+       WHERE NVL(TC_STATUS, 'I') = 'I'
+      UNION ALL
+      SELECT 3,
+             'Accepted',
+             TO_CHAR(COUNT(*)),
+             'fa-check-circle'
+        FROM HR.TMGT_CARGO
+       WHERE TC_STATUS = 'C'
+      UNION ALL
+      SELECT 4,
+             'Rejected',
+             TO_CHAR(COUNT(*)),
+             'fa-times-circle'
+        FROM HR.TMGT_CARGO
+        WHERE TC_STATUS = 'R'
+      UNION ALL
+      
+      SELECT 5,
+             'This Month',
+             TO_CHAR(COUNT(*)),
+             'fa-calendar'
+        FROM HR.TMGT_CARGO
+       WHERE TC_ISSUE_DATE >= TRUNC(SYSDATE, 'MM')
+         AND TC_ISSUE_DATE < ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+      )
+      ORDER BY SORT_ORDER
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: cert_summary
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15257357060036590
+    appearance: 
+      layout: Grid
+      grid-columns: 5 Columns
+
+    title: 
+      advanced-formatting: false
+      column: CARD_TITLE
+
+    subtitle: 
+      advanced-formatting: false
+
+    body: 
+      advanced-formatting: false
+      column: CARD_VALUE
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Icon Class
+      icon-css-classes: fa &CARD_ICON.
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: No Media
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+- # ====== Region: Certificate Status ==========================
+  id: 15257466782036591
+  identification: 
+    name: Certificate Status
+    title: Certificate Status
+    type: Chart
+
+  source: 
+    location: None
+
+  layout: 
+    sequence: 30
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: 6
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: cert_status
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  security: 
+    escape-special-characters: true
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15257543450036592
+    chart: 
+      type: Donut
+
+    layout: 
+      height: 400
+
+    data-cursor: 
+      cursor: Automatic
+      behavior: Automatic
+      dim-on-hover: true
+
+    settings: 
+      pie-selection-effect: Highlight
+
+    value: 
+      pie-chart-other-threshold: 0
+      format: Decimal
+      decimal-places: 0
+      format-scaling: None
+
+    animation: 
+      on-display: Automatic
+      on-data-change: Automatic
+
+    tooltip: 
+      show: true
+      show-series-name: true
+      show-value: true
+
+    legend: 
+      show: true
+      position: End
+      hide-and-show-behavior: Rescale
+
+    automatic-refresh: 
+      interval: 60
+
+    advanced: 
+      initialization-javascript-function: |
+        function (options) {
+        
+            options.styleDefaults = options.styleDefaults || {};
+        
+            options.styleDefaults.colors = [
+                "#28A745",   // Accepted
+                "#FFC107",   // Incomplete
+                "#DC3545"    // Rejected
+            ];
+        
+            return options;
+        }
+
+    series: 
+    - # ====== Series: New =========================================
+      id: 15257646743036593
+      identification: 
+        name: New
+
+      execution: 
+        sequence: 10
+
+      source: 
+        location: Local Database
+        type: SQL Query
+        sql-query: |
+          Select *
+          From
+          (SELECT 1 AS SORT_ORDER,
+                 'Accepted'   AS STATUS_NAME,
+                 COUNT(*)     AS STATUS_COUNT
+          FROM HR.TMGT_CARGO
+          WHERE TC_STATUS = 'C'
+          
+          UNION ALL
+          
+          SELECT 2,
+                 'Incomplete',
+                 COUNT(*)
+          FROM HR.TMGT_CARGO
+          WHERE NVL(TC_STATUS, 'I') = 'I'
+          
+          UNION ALL
+          
+          SELECT 3,
+                 'Rejected',
+                 COUNT(*)
+          FROM HR.TMGT_CARGO
+          WHERE TC_STATUS = 'R'
+          )
+          ORDER BY SORT_ORDER
+
+      order-by: 
+        type: None
+
+      column-mapping: 
+        label: STATUS_NAME
+        value: STATUS_COUNT
+        custom-tooltip: STATUS_NAME
+        custom-column: STATUS_NAME
+
+      label: 
+        show: true
+        position: Automatic
+        display-as: Label - Percentage ( Value )
+
+- # ====== Region: Certificates by Month =======================
+  id: 15257999071036596
+  identification: 
+    name: Certificates by Month
+    title: Certificates by Month
+    type: Chart
+
+  source: 
+    location: None
+
+  layout: 
+    sequence: 40
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: 6
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: cert_monthly
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  security: 
+    escape-special-characters: true
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15258115532036597
+    chart: 
+      type: Bar
+
+    appearance: 
+      orientation: Vertical
+      stack: false
+
+    layout: 
+      height: 400
+
+    data-cursor: 
+      cursor: Automatic
+      behavior: Automatic
+      dim-on-hover: true
+
+    multi-series-chart-data: 
+      fill-gaps-in-chart-data: true
+      sort-order: Label - Ascending
+      render-gap-as-zero: true
+
+    settings: 
+      zoom-and-scroll: No
+
+    animation: 
+      on-display: Automatic
+      on-data-change: Automatic
+
+    tooltip: 
+      show: true
+      show-series-name: true
+      show-group-name: true
+      show-value: true
+
+    legend: 
+      show: true
+      position: End
+      hide-and-show-behavior: Rescale
+
+    automatic-refresh: 
+      interval: 60
+
+    advanced: 
+      initialization-javascript-function: |
+        function (options) {
+        
+            options.styleDefaults = options.styleDefaults || {};
+        
+            options.styleDefaults.colors = [
+                "#28A745",   // Accepted
+                "#FFC107",   // Incomplete
+                "#DC3545"    // Rejected
+            ];
+        
+            return options;
+        }
+
+    series: 
+    - # ====== Series: New =========================================
+      id: 15258194324036598
+      identification: 
+        name: New
+
+      execution: 
+        sequence: 10
+
+      source: 
+        location: Local Database
+        type: SQL Query
+        sql-query: |
+          SELECT TRUNC(TC_ISSUE_DATE, 'MM') AS MONTH_DATE,
+          
+                 TO_CHAR(
+                     TRUNC(TC_ISSUE_DATE, 'MM'),
+                     'MON YYYY'
+                 ) AS MONTH_NAME,
+          
+                 COUNT(*) AS CERTIFICATE_COUNT
+          
+          FROM HR.TMGT_CARGO
+          
+          WHERE TC_ISSUE_DATE >=
+                ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -11)
+          
+          GROUP BY TRUNC(TC_ISSUE_DATE, 'MM')
+          
+          ORDER BY MONTH_DATE
+
+      order-by: 
+        type: None
+
+      column-mapping: 
+        label: MONTH_NAME
+        value: CERTIFICATE_COUNT
+
+      appearance: 
+        assigned-to-y2-axis: false
+
+      label: 
+        show: true
+        position: Automatic
+
+    axes: 
+    - # ====== Axis: x =============================================
+      id: 15258230774036599
+      identification: 
+        name: x
+        show-axis: true
+
+      value: 
+        format-scaling: Automatic
+        baseline-scaling: Zero
+        scale: Linear
+
+      major-ticks: 
+        show: Yes
+
+      minor-ticks: 
+        show: false
+
+      tick-label: 
+        show: true
+        rotation: true
+        position: Outside
+
+    - # ====== Axis: y =============================================
+      id: 15258400076036600
+      identification: 
+        name: y
+        show-axis: true
+
+      value: 
+        format: Decimal
+        decimal-places: 0
+        format-scaling: None
+        baseline-scaling: Zero
+        scale: Linear
+
+      appearance: 
+        position: Automatic
+
+      major-ticks: 
+        show: Yes
+
+      minor-ticks: 
+        show: false
+
+      tick-label: 
+        show: true
+
+- # ====== Region: Financial Summary ===========================
+  id: 15258504539036601
+  identification: 
+    name: Financial Summary
+    title: Financial Summary
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      Select *
+      From
+      (SELECT 1 SORT_ORDER,
+             'Total Sum Covers' CARD_TITLE,
+             TO_CHAR(
+                 NVL(SUM(TC_TOTAL_SUM_COVERS), 0),
+                 'FM999G999G999G999G990D00'
+             ) CARD_VALUE,
+             'fa-shield' CARD_ICON
+      FROM HR.TMGT_CARGO
+      WHERE NVL(TC_STATUS, 'I') <> 'R'
+      
+      UNION ALL
+      
+      SELECT 2,
+             'Net Premium',
+             TO_CHAR(
+                 NVL(SUM(TC_NET_PREMIUM), 0),
+                 'FM999G999G999G999G990D00'
+             ),
+             'fa-money'
+      FROM HR.TMGT_CARGO
+      WHERE NVL(TC_STATUS, 'I') <> 'R'
+      
+      UNION ALL
+      
+      SELECT 3,
+             'Gross Premium',
+             TO_CHAR(
+                 NVL(SUM(TC_GROSS_PREMIUM), 0),
+                 'FM999G999G999G999G990D00'
+             ),
+             'fa-line-chart'
+      FROM HR.TMGT_CARGO
+      WHERE NVL(TC_STATUS, 'I') <> 'R'
+      )
+      ORDER BY SORT_ORDER
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 50
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: financial_summary
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15258597473036602
+    appearance: 
+      layout: Grid
+      grid-columns: Auto
+
+    title: 
+      advanced-formatting: false
+      column: CARD_TITLE
+
+    subtitle: 
+      advanced-formatting: false
+
+    body: 
+      advanced-formatting: false
+      column: CARD_VALUE
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Icon Class
+      icon-css-classes: fa &CARD_ICON.
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: No Media
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+- # ====== Region: Recent Certificates =========================
+  id: 15258668147036603
+  identification: 
+    name: Recent Certificates
+    type: Interactive Report
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      SELECT *
+      FROM
+      (
+          SELECT
+              TC_ID,
+              TC_CERTIFICATE_NO,
+              TC_CONTRACT_NO,
+              TC_INSURED_NAME,
+              TC_ISSUE_DATE,
+              TC_TOTAL_SUM_COVERS,
+              TC_NET_PREMIUM,
+              TC_GROSS_PREMIUM,
+      
+              CASE NVL(TC_STATUS, 'I')
+                  WHEN 'C' THEN
+                      '<span class="cargo-status cargo-status--accepted">
+                          Accepted
+                       </span>'
+      
+                  WHEN 'R' THEN
+                      '<span class="cargo-status cargo-status--rejected">
+                          Rejected
+                       </span>'
+      
+                  ELSE
+                      '<span class="cargo-status cargo-status--incomplete">
+                          Incomplete
+                       </span>'
+              END AS STATUS_DISPLAY
+      
+          FROM HR.TMGT_CARGO
+      
+          ORDER BY TC_ID DESC
+      )
+      WHERE ROWNUM <= 10
+
+  layout: 
+    sequence: 60
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Interactive Report
+    template-options: 
+    - '#DEFAULT#'
+    - t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: recent_certificates
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-cache: 
+    caching: Disabled
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15258815736036604
+    link: 
+      link-column: Exclude Link Column
+
+    pagination: 
+      type: Row Ranges X to Y
+      display-position: Bottom - Right
+
+    performance: 
+      lazy-loading: false
+      maximum-rows-to-process: 1000000
+
+    search-bar: 
+      include-search-bar: true
+      search-field: true
+      finder-drop-down: true
+      reports-select-list: true
+      rows-per-page-selector: false
+
+    actions-menu: 
+      include-actions-menu: true
+      filter: true
+      select-columns: true
+      rows-per-page: true
+      sort: true
+      control-break: true
+      highlight: true
+      compute: true
+      aggregate: true
+      chart: true
+      group-by: true
+      pivot: true
+      flashback: true
+      save-report: true
+      save-public-report: false
+      reset: true
+      help: true
+      download: true
+      subscription: true
+
+    download: 
+      formats: 
+      - CSV
+      - HTML
+      - Excel
+      - PDF
+      send-as-email: true
+
+    heading: 
+      fixed-to: Page
+
+    icon-view: 
+      show: false
+
+    detail-view: 
+      show: false
+
+    saved-reports: 
+    - # ====== Saved Report: Primary Report ========================
+      id: 15300928715990739
+      identification: 
+        name: Primary Report
+        alias: 94961
+
+    columns: 
+    - # ====== Column: TC_ID =======================================
+      id: 15258891903036605
+      identification: 
+        column-name: TC_ID
+        type: Hidden
+
+      heading: 
+        heading: Id
+
+      layout: 
+        sequence: 10
+
+      source: 
+        primary-key: false
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_CERTIFICATE_NO ===========================
+      id: 15258943373036606
+      identification: 
+        column-name: TC_CERTIFICATE_NO
+        type: Plain Text
+
+      heading: 
+        heading: Certificate No
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 20
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_CONTRACT_NO ==============================
+      id: 15259083342036607
+      identification: 
+        column-name: TC_CONTRACT_NO
+        type: Plain Text
+
+      heading: 
+        heading: Contract No
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 30
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_INSURED_NAME =============================
+      id: 15259157714036608
+      identification: 
+        column-name: TC_INSURED_NAME
+        type: Plain Text
+
+      heading: 
+        heading: Insured Name
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 40
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_ISSUE_DATE ===============================
+      id: 15259287976036609
+      identification: 
+        column-name: TC_ISSUE_DATE
+        type: Plain Text
+
+      heading: 
+        heading: Issue Date
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 50
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+        date-ranges: All
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_TOTAL_SUM_COVERS =========================
+      id: 15259348797036610
+      identification: 
+        column-name: TC_TOTAL_SUM_COVERS
+        type: Plain Text
+
+      heading: 
+        heading: Total Sum Covers
+        alignment: end
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 60
+        column-alignment: end
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_NET_PREMIUM ==============================
+      id: 15259427953036611
+      identification: 
+        column-name: TC_NET_PREMIUM
+        type: Plain Text
+
+      heading: 
+        heading: Net Premium
+        alignment: end
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 70
+        column-alignment: end
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TC_GROSS_PREMIUM ============================
+      id: 15259598402036612
+      identification: 
+        column-name: TC_GROSS_PREMIUM
+        type: Plain Text
+
+      heading: 
+        heading: Gross Premium
+        alignment: end
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 80
+        column-alignment: end
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: STATUS_DISPLAY ==============================
+      id: 15259693770036613
+      identification: 
+        column-name: STATUS_DISPLAY
+        type: Plain Text
+
+      heading: 
+        heading: Status Display
+        alignment: center
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 90
+        column-alignment: center
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: false
+
+    printing: 
+      output: 
+        layout: Default Report Layout
+        view-file-as: Attachment
+
+      page: 
+        size: Letter
+        orientation: Landscape
+        units: Inches
+        width: 11
+        height: 8.5
+        border-width: 0.5
+        border-color: '#666666'
+
+      page-header: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 12
+        font-color: '#000000'
+        alignment: center
+
+      column-headings: 
+        font: Helvetica
+        font-weight: Bold
+        font-size: 10
+        font-color: '#000000'
+        background-color: '#EEEEEE'
+
+      columns: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 10
+        font-color: '#000000'
+        background-color: '#FFFFFF'
+
+      page-footer: 
+        font: Helvetica
+        font-weight: Normal
+        font-size: 12
+        font-color: '#000000'
+        alignment: center
+
+- # ====== Region: Recent Bulk Uploads =========================
+  id: 15259800514036614
+  identification: 
+    name: Recent Bulk Uploads
+    type: Classic Report
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      SELECT *
+      FROM
+      (
+          SELECT
+              CUB_ID,
+              CUB_FILE_NAME,
+              CUB_CONTRACT_NO,
+              CUB_TOTAL_ROWS,
+              CUB_SUCCESS_ROWS,
+              CUB_FAILED_ROWS,
+              CUB_STATUS,
+              CUB_CR_USER,
+              CUB_CR_DATE
+      
+          FROM HR.TMGT_CARGO_UPLOAD_BATCH
+      
+          ORDER BY CUB_ID DESC
+      )
+      WHERE ROWNUM <= 5
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 70
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: 8
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    static-id: recent_bulk
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  server-cache: 
+    caching: Disabled
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    layout: 
+      number-of-rows-type: Static Value
+      number-of-rows: 15
+
+    appearance: 
+      template-type: Theme
+      template: Standard
+      template-options: 
+      - '#DEFAULT#'
+      - t-Report--altRowsDefault
+      - t-Report--rowHighlight
+
+    pagination: 
+      type: Row Ranges X to Y (with next and previous links)
+      display-position: Bottom - Right
+      partial-page-refresh: true
+
+    performance: 
+      lazy-loading: false
+
+    break-formatting: 
+      break-columns: No Break
+
+    advanced: 
+      strip-html: false
+      sort-nulls: Last
+
+    heading: 
+      type: Custom Headings
+
+    download: 
+      csv-export-enabled: false
+
+    printing: 
+      enabled: false
+
+  columns: 
+  - # ====== Column: CUB_ID ======================================
+    id: 15259860568036615
+    identification: 
+      column-name: CUB_ID
+      type: Hidden
+
+    layout: 
+      sequence: 10
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_FILE_NAME ===============================
+    id: 15259943873036616
+    identification: 
+      column-name: CUB_FILE_NAME
+      type: Plain Text
+
+    heading: 
+      heading: File Name
+      alignment: start
+
+    layout: 
+      sequence: 20
+      column-alignment: start
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_CONTRACT_NO =============================
+    id: 15260064919036617
+    identification: 
+      column-name: CUB_CONTRACT_NO
+      type: Plain Text
+
+    heading: 
+      heading: Contract No
+      alignment: start
+
+    layout: 
+      sequence: 30
+      column-alignment: start
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_TOTAL_ROWS ==============================
+    id: 15260213069036618
+    identification: 
+      column-name: CUB_TOTAL_ROWS
+      type: Plain Text
+
+    heading: 
+      heading: Total Rows
+      alignment: end
+
+    layout: 
+      sequence: 40
+      column-alignment: end
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_SUCCESS_ROWS ============================
+    id: 15260272684036619
+    identification: 
+      column-name: CUB_SUCCESS_ROWS
+      type: Plain Text
+
+    heading: 
+      heading: Success Rows
+      alignment: end
+
+    layout: 
+      sequence: 50
+      column-alignment: end
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_FAILED_ROWS =============================
+    id: 15260348974036620
+    identification: 
+      column-name: CUB_FAILED_ROWS
+      type: Plain Text
+
+    heading: 
+      heading: Failed Rows
+      alignment: end
+
+    layout: 
+      sequence: 60
+      column-alignment: end
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_STATUS ==================================
+    id: 15260451065036621
+    identification: 
+      column-name: CUB_STATUS
+      type: Plain Text
+
+    heading: 
+      heading: Status
+      alignment: start
+
+    layout: 
+      sequence: 70
+      column-alignment: start
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_CR_USER =================================
+    id: 15260615169036622
+    identification: 
+      column-name: CUB_CR_USER
+      type: Plain Text
+
+    heading: 
+      heading: Created User
+      alignment: start
+
+    layout: 
+      sequence: 80
+      column-alignment: start
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+  - # ====== Column: CUB_CR_DATE =================================
+    id: 15260700447036623
+    identification: 
+      column-name: CUB_CR_DATE
+      type: Plain Text
+
+    heading: 
+      heading: Created Date
+      alignment: start
+
+    layout: 
+      sequence: 90
+      column-alignment: start
+
+    accessibility: 
+      value-identifies-row: false
+
+    sorting: 
+      sortable: true
+
+    export-/-printing: 
+      include-in-export-/-print: true
+
+    advanced: 
+      compute-sum: false
+
+    ui-defaults-reference: 
+      table-owner: Parsing Schema
+
+    security: 
+      escape-special-characters: true
+
+- # ====== Region: Quick Actions ===============================
+  id: 15260766846036624
+  identification: 
+    name: Quick Actions
+    type: Cards
+
+  source: 
+    location: Local Database
+    type: SQL Query
+    sql-query: |
+      Select *
+      From
+      (SELECT 1 AS SORT_ORDER,
+             'New Certificate' AS CARD_TITLE,
+             'Create a new cargo certificate' AS CARD_SUBTITLE,
+             'fa-plus-circle' AS CARD_ICON,
+             APEX_PAGE.GET_URL(
+                 p_page        => 2,
+                 p_clear_cache => '2'
+             ) AS CARD_URL
+      FROM DUAL
+      
+      UNION ALL
+      
+      SELECT 2,
+             'Bulk Upload',
+             'Upload certificates from Excel',
+             'fa-upload',
+             APEX_PAGE.GET_URL(
+                 p_page        => 7,
+                 p_clear_cache => '7'
+             )
+      FROM DUAL
+      
+      UNION ALL
+      
+      SELECT 3,
+             'Certificate Reports',
+             'Extract certificate reports',
+             'fa-print',
+             APEX_PAGE.GET_URL(
+                 p_page        => 6,
+                 p_clear_cache => '6'
+             )
+      FROM DUAL
+      )
+      ORDER BY SORT_ORDER
+
+  order-by: 
+    type: None
+
+  layout: 
+    sequence: 80
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Cards Container
+    template-options: 
+    - '#DEFAULT#'
+    - t-CardsRegion--hideHeader js-addHiddenHeadingRoleDesc
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    id: 15260868996036625
+    appearance: 
+      layout: Grid
+      grid-columns: Auto
+
+    title: 
+      advanced-formatting: false
+      column: CARD_TITLE
+
+    subtitle: 
+      advanced-formatting: false
+      column: CARD_SUBTITLE
+
+    body: 
+      advanced-formatting: false
+
+    secondary-body: 
+      advanced-formatting: false
+
+    icon-and-badge: 
+      icon-source: Icon Class
+      icon-css-classes: fa &CARD_ICON.
+      icon-position: Start
+
+    media: 
+      advanced-formatting: false
+      source: No Media
+
+    performance: 
+      lazy-loading: false
+
+    pagination: 
+      type: Scroll
+      show-total-count: false
+
+    actions: 
+    - # ====== Action: Full Card ===================================
+      id: 15261222143036628
+      identification: 
+        type: Full Card
+
+      layout: 
+        sequence: 10
+
+      link: 
+        type: Redirect to URL
+        target: '&CARD_URL.'
+
+- # ====== Region: Header ======================================
+  id: 25667436170156920
+  identification: 
+    name: Header
+    type: Static Content
+
+  source: 
+    html-code: |
+      <div class="marinecert-home-hero">
+          <img src="#APP_FILES#MarineCert 2.png" alt="MarineCert Logo" class="marinecert-home-logo">
+      
+          <div class="marinecert-home-text">
+              <h1>Marine Certificate Application</h1>
+              <h2>Hello &APP_USER.</h2>
+          </div>
+      </div>
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Blank with Attributes
+    template-options: 
+    - '#DEFAULT#'
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+page-items: 
+- # ====== Page Item: P1_MONTH =================================
+  id: 18811141841622196
+  identification: 
+    name: P1_MONTH
+    type: Hidden
+
+  settings: 
+    value-protected: true
+
+  layout: 
+    sequence: 90
+    region: No Parent
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  default: 
+    type: Expression
+    language: PL/SQL
+    pl/sql-expression: TO_CHAR(SYSDATE,'FMMonth YYYY')
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Session (Persistent)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+dynamic-actions: 
+- # ====== Dynamic Action: AUTO_REFRESH_DASHBOARD ==============
+  id: 15261231601036629
+  identification: 
+    name: AUTO_REFRESH_DASHBOARD
+
+  execution: 
+    sequence: 10
+    event-scope: Static
+
+  when: 
+    event: Page Load
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 15261363977036630
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        (function () {
+        
+            const normalRegions = [
+                "cert_summary",
+                "cert_status",
+                "cert_monthly",
+                "financial_summary",
+                "recent_bulk"
+            ];
+        
+            function refreshHomeDashboard() {
+        
+                if (document.visibilityState !== "visible") {
+                    return;
+                }
+        
+                const currentScroll =
+                    window.scrollY ||
+                    document.documentElement.scrollTop;
+        
+                const refreshPromises = [];
+        
+                /* Refresh Cards / Charts */
+                normalRegions.forEach(function (regionId) {
+        
+                    const region = apex.region(regionId);
+        
+                    if (region &&
+                        typeof region.refresh === "function") {
+        
+                        refreshPromises.push(
+                            Promise.resolve(region.refresh())
+                        );
+                    }
+                });
+        
+        
+                /* Interactive Report */
+                const irRegion =
+                    apex.region("recent_certificates");
+        
+                if (irRegion &&
+                    typeof irRegion.refresh === "function") {
+        
+                    refreshPromises.push(
+                        Promise.resolve(
+                            irRegion.refresh(true)
+                        )
+                    );
+                }
+        
+        
+                Promise.allSettled(refreshPromises)
+                    .then(function () {
+        
+                        requestAnimationFrame(function () {
+        
+                            window.scrollTo({
+                                top: currentScroll,
+                                left: 0,
+                                behavior: "auto"
+                            });
+        
+                        });
+        
+                    });
+            }
+        
+        
+            if (window.homeDashboardRefreshTimer) {
+        
+                clearInterval(
+                    window.homeDashboardRefreshTimer
+                );
+            }
+        
+        
+            window.homeDashboardRefreshTimer =
+                setInterval(
+                    refreshHomeDashboard,
+                    30000
+                );
+        
+        })();
+
+    execution: 
+      sequence: 10
+      event: AUTO_REFRESH_DASHBOARD # 15261231601036629
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
+- # ====== Dynamic Action: REFRESH_RECENT_CERTIFICATES =========
+  id: 15261483397036631
+  identification: 
+    name: REFRESH_RECENT_CERTIFICATES
+
+  execution: 
+    sequence: 20
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Custom
+    custom-event: home_ir_refresh
+    selection-type: Region
+    region: Recent Certificates # 15258668147036603
+
+  actions: 
+  - # ====== Action: New =========================================
+    id: 15261612138036632
+    identification: 
+      name: New
+      action: Refresh
+
+    settings: 
+      maintain-pagination: true
+
+    affected-elements: 
+      selection-type: Region
+      region: Recent Certificates # 15258668147036603
+
+    execution: 
+      sequence: 10
+      event: REFRESH_RECENT_CERTIFICATES # 15261483397036631
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+

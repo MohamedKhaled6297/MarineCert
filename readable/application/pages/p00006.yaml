@@ -1,0 +1,398 @@
+---
+# ====== Page: Certificate Reports ===========================
+id: 6
+identification: 
+  name: Certificate Reports
+  alias: CERTIFICATE-REPORTS
+  title: Certificate Reports
+
+appearance: 
+  page-mode: Normal
+  page-template: Theme Default
+  template-options: 
+  - '#DEFAULT#'
+
+navigation-menu: 
+  override-user-interface-level: false
+
+navigation: 
+  cursor-focus: Do not focus cursor
+  warn-on-unsaved-changes: true
+
+security: 
+  authentication: Page Requires Authentication
+  deep-linking: Application Default
+  page-access-protection: Arguments Must Have Checksum
+  form-auto-complete: Off
+  browser-cache: Application Default
+
+session-management: 
+  rejoin-sessions: Application Default
+
+advanced: 
+  enable-duplicate-page-submissions: Yes - Enable page to be re-posted
+  reload-on-submit: Only for Success
+
+server-cache: 
+  caching: Disabled
+
+regions: 
+- # ====== Region: Extract Certificate Reports =================
+  id: 15169237101562695
+  identification: 
+    name: Extract Certificate Reports
+    title: Extract Certificate Reports
+    type: Static Content
+
+  layout: 
+    sequence: 20
+    parent-region: No Parent
+    slot: BODY
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Standard
+    template-options: 
+    - '#DEFAULT#'
+    - t-Region--scrollBody
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    settings: 
+      output-as: HTML
+      expand-shortcuts: false
+
+- # ====== Region: Breadcrumb ==================================
+  id: 15197068767989403
+  identification: 
+    name: Breadcrumb
+    type: Breadcrumb
+
+  source: 
+    breadcrumb: Breadcrumb # 25470073129156670
+
+  layout: 
+    sequence: 10
+    parent-region: No Parent
+    slot: REGION_POSITION_01
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    template: Title Bar
+    template-options: 
+    - '#DEFAULT#'
+    - t-BreadcrumbRegion--useBreadcrumbTitle
+    render-components: Above Content
+
+  accessibility: 
+    use-landmark: true
+    landmark-type: Template Default
+
+  advanced: 
+    region-display-selector: false
+    exclude-title-from-translation: false
+
+  customization: 
+    customizable: Not Customizable By End Users
+
+  attributes: 
+    appearance: 
+      breadcrumb-template: Breadcrumb
+      template-options: 
+      - '#DEFAULT#'
+
+page-items: 
+- # ====== Page Item: P6_CERTIFICATE_NO ========================
+  id: 15169344941562696
+  identification: 
+    name: P6_CERTIFICATE_NO
+    type: Popup LOV
+
+  label: 
+    label: Certificate No
+    alignment: Left
+
+  settings: 
+    display-as: Inline Popup
+    initial-fetch: Automatic
+    manual-entry: false
+    fetch-on-search: false
+
+  search: 
+    match-type: Contains
+    case-sensitive: false
+    minimum-characters: 0
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 10
+    region: Extract Certificate Reports # 15169237101562695
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    width: 30
+
+  validation: 
+    value-required: false
+
+  list-of-values: 
+    type: SQL Query
+    sql-query: |
+      SELECT TC_CERTIFICATE_NO
+             || ' / '
+             || TC_INSURED_NAME AS DISPLAY_VALUE,
+      
+             TC_CERTIFICATE_NO  AS RETURN_VALUE
+      FROM HR.TMGT_CARGO
+      WHERE TC_CERTIFICATE_NO IS NOT NULL
+      AND TC_STATUS = 'C'
+      ORDER BY TC_ID DESC
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P6_REPORT_TYPE ===========================
+  id: 15169464494562697
+  identification: 
+    name: P6_REPORT_TYPE
+    type: Select List
+
+  label: 
+    label: Report Type
+    alignment: Left
+
+  settings: 
+    page-action-on-selection: None
+
+  multiple-values: 
+    type: No
+
+  layout: 
+    sequence: 20
+    region: Extract Certificate Reports # 15169237101562695
+    slot: BODY
+    alignment: Left
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    label-column-span: Page Template Default
+
+  appearance: 
+    template: Optional - Floating
+    template-options: 
+    - '#DEFAULT#'
+    height: 1
+
+  validation: 
+    value-required: false
+
+  list-of-values: 
+    type: Static Values
+    static-values: 'STATIC:Cargo Air Transit Receipt Eng;RECEIPT,Cargo Air Transit Certificate Eng;CERTIFICATE'
+    display-extra-values: true
+    display-null-value: true
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    type: Null
+    used: Only when current value in session state is null
+
+  session-state: 
+    storage: Per Session (Persistent)
+
+  quick-picks: 
+    show-quick-picks: false
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+buttons: 
+- # ====== Button: EXTRACT_REPORT ==============================
+  id: 15169566214562698
+  identification: 
+    button-name: EXTRACT_REPORT
+    label: Extract
+
+  layout: 
+    sequence: 30
+    region: Extract Certificate Reports # 15169237101562695
+    slot: BODY
+    start-new-layout: false
+    start-new-row: false
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+    alignment: Left center
+
+  appearance: 
+    button-template: Text with Icon
+    hot: true
+    template-options: 
+    - '#DEFAULT#'
+    - t-Button--iconLeft
+    icon: fa-download
+
+  behavior: 
+    action: Submit Page
+    execute-validations: true
+    show-processing: false
+    warn-on-unsaved-changes: Do Not Check
+
+validations: 
+- # ====== Validation: VALIDATE_CERTIFICATE ====================
+  id: 15169691490562699
+  identification: 
+    name: VALIDATE_CERTIFICATE
+
+  execution: 
+    sequence: 10
+
+  validation: 
+    type: Item is NOT NULL
+    item: P6_CERTIFICATE_NO
+    always-execute: false
+
+  error: 
+    error-message: Please select Certificate No.
+    display-location: Inline with Field and in Notification
+
+  server-side-condition: 
+    when-button-pressed: EXTRACT_REPORT # 15169566214562698
+
+- # ====== Validation: VALIDATE_REPORT_TYPE ====================
+  id: 15169794673562700
+  identification: 
+    name: VALIDATE_REPORT_TYPE
+
+  execution: 
+    sequence: 20
+
+  validation: 
+    type: Item is NOT NULL
+    item: P6_REPORT_TYPE
+    always-execute: false
+
+  error: 
+    error-message: Please select Report Type.
+    display-location: Inline with Field and in Notification
+
+  server-side-condition: 
+    when-button-pressed: EXTRACT_REPORT # 15169566214562698
+
+processes: 
+- # ====== Process: SET_PRINT_CERTIFICATE_ID ===================
+  id: 15169888882562701
+  identification: 
+    name: SET_PRINT_CERTIFICATE_ID
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: ':G_PRINT_CERTIFICATE_ID := :P6_CERTIFICATE_NO;'
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
+  server-side-condition: 
+    when-button-pressed: EXTRACT_REPORT # 15169566214562698
+
+branches: 
+- # ====== Branch: PRINT_RECEIPT ===============================
+  id: 15169947760562702
+  identification: 
+    name: PRINT_RECEIPT
+
+  execution: 
+    sequence: 10
+    point: After Processing
+
+  behavior: 
+    type: Page or URL (Redirect)
+    target: "javascript:var rpt=window.open('f?p=&APP_ID.:0:&SESSION.:PRINT_REPORT=Cargo%20Air%20Transit%20Receipt%20Eng', '_blank');"
+
+  server-side-condition: 
+    when-button-pressed: EXTRACT_REPORT # 15169566214562698
+    type: Item = Value
+    item: P6_REPORT_TYPE
+    value: RECEIPT
+
+- # ====== Branch: PRINT_CERTIFICATE ===========================
+  id: 15170118459562703
+  identification: 
+    name: PRINT_CERTIFICATE
+
+  execution: 
+    sequence: 20
+    point: After Processing
+
+  behavior: 
+    type: Page or URL (Redirect)
+    target: "javascript:var rpt=window.open('f?p=&APP_ID.:0:&SESSION.:PRINT_REPORT=Cargo%20Air%20Transit%20Certificate%20Eng', '_blank');"
+
+  server-side-condition: 
+    when-button-pressed: EXTRACT_REPORT # 15169566214562698
+    type: Item = Value
+    item: P6_REPORT_TYPE
+    value: CERTIFICATE
+

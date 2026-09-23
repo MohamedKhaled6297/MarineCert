@@ -1,0 +1,53 @@
+---
+- # ====== Authorization: ADMIN_AUTH ===========================
+  id: 19371322376177471
+  identification: 
+    name: ADMIN_AUTH
+
+  subscription: 
+    version-number: 4865579
+
+  authorization-scheme: 
+    type: PL/SQL Function Returning Boolean
+
+  settings: 
+    pl/sql-function-body: |
+      DECLARE
+         v_count NUMBER;
+      BEGIN
+         SELECT 1
+         INTO v_count
+         FROM HR.TMGT_CARGO_USER
+         WHERE UPPER(TCU_NAME) = UPPER(:APP_USER)
+         AND TCU_ADMIN_AUTH = 'Y';
+      
+         RETURN TRUE;
+      EXCEPTION
+         WHEN NO_DATA_FOUND THEN
+            RETURN FALSE;
+      END;
+      
+
+  server-cache: 
+    evaluation-point: Once per Session
+
+- # ====== Authorization: Administration Rights ================
+  id: 25660676981156881
+  identification: 
+    name: Administration Rights
+
+  subscription: 
+    version-number: 4586167
+
+  authorization-scheme: 
+    type: PL/SQL Function Returning Boolean
+
+  settings: 
+    pl/sql-function-body: return true;
+
+  server-cache: 
+    evaluation-point: Once per Page View
+
+  error: 
+    error-message: Insufficient privileges, user is not an Administrator
+

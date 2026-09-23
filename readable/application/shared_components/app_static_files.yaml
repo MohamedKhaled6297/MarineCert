@@ -1,0 +1,108 @@
+---
+- # ====== Static Application File: icons/app-icon-144-rounded.p
+  id: 6314984480544032
+  identification: 
+    file-name: icons/app-icon-144-rounded.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: icons/app-icon-256-rounded.p
+  id: 6315460201544051
+  identification: 
+    file-name: icons/app-icon-256-rounded.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: MarineCert.png =============
+  id: 6317262729573543
+  identification: 
+    file-name: MarineCert.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: style.min.css ==============
+  id: 6322286533627167
+  identification: 
+    file-name: style.min.css
+
+  attributes: 
+    mime-type: text/css
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: MarineCert 2.png ===========
+  id: 6322946846631296
+  identification: 
+    file-name: MarineCert 2.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: app-icon.svg ===============
+  id: 25659045019156879
+  identification: 
+    file-name: app-icon.svg
+
+  attributes: 
+    mime-type: image/svg+xml
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: app-icon.css ===============
+  id: 25659318310156881
+  identification: 
+    file-name: app-icon.css
+
+  attributes: 
+    mime-type: text/css
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: app-100-logo.jpg ===========
+  id: 25715897376571745
+  identification: 
+    file-name: app-100-logo.jpg
+
+  attributes: 
+    mime-type: image/jpeg
+
+- # ====== Static Application File: style.css ==================
+  id: 25752768524224842
+  identification: 
+    file-name: style.css
+
+  attributes: 
+    mime-type: text/css
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: icons/app-icon-32.png ======
+  id: 83504852543175172
+  identification: 
+    file-name: icons/app-icon-32.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: icons/app-icon-192.png =====
+  id: 83505062723175188
+  identification: 
+    file-name: icons/app-icon-192.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
+- # ====== Static Application File: icons/app-icon-512.png =====
+  id: 83505333703175202
+  identification: 
+    file-name: icons/app-icon-512.png
+
+  attributes: 
+    mime-type: image/png
+    file-character-set: Unicode UTF-8
+
