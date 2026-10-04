@@ -160,6 +160,88 @@ regions:
         alias: 57416
 
     columns: 
+    - # ====== Column: TCU_DISABLE_USER ============================
+      id: 4402827886369926
+      identification: 
+        column-name: TCU_DISABLE_USER
+        type: Plain Text
+
+      heading: 
+        heading: Disable User
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 80
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
+    - # ====== Column: TCU_DISABLE_DATE ============================
+      id: 4402976760369927
+      identification: 
+        column-name: TCU_DISABLE_DATE
+        type: Plain Text
+
+      heading: 
+        heading: Disable Date
+        alignment: start
+
+      single-row-view: 
+        use-column-heading: true
+
+      layout: 
+        sequence: 90
+        column-alignment: start
+
+      accessibility: 
+        value-identifies-row: false
+
+      source: 
+        primary-key: false
+
+      column-filter: 
+        type: Default Based on Column Type
+
+      enable-users-to: 
+        hide: true
+        sort: true
+        filter: true
+        highlight: true
+        control-break: true
+        aggregate: true
+        compute: true
+        chart: true
+        group-by: true
+        pivot: true
+
+      security: 
+        escape-special-characters: true
+
     - # ====== Column: TCU_ID ======================================
       id: 15049548564125408
       identification: 
@@ -314,7 +396,7 @@ regions:
         heading: Otp ID
 
       layout: 
-        sequence: 60
+        sequence: 100
 
       source: 
         primary-key: false
@@ -336,7 +418,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 70
+        sequence: 110
         column-alignment: start
 
       accessibility: 
@@ -377,7 +459,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 80
+        sequence: 130
         column-alignment: start
 
       accessibility: 
@@ -418,7 +500,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 90
+        sequence: 120
         column-alignment: start
 
       accessibility: 
@@ -455,7 +537,7 @@ regions:
         heading: Tcu Session Id
 
       layout: 
-        sequence: 100
+        sequence: 150
 
       source: 
         primary-key: false
@@ -477,7 +559,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 110
+        sequence: 60
         column-alignment: start
 
       accessibility: 
@@ -518,7 +600,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 130
+        sequence: 70
         column-alignment: start
 
       accessibility: 
@@ -559,7 +641,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 140
+        sequence: 160
         column-alignment: start
 
       accessibility: 
@@ -600,7 +682,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 150
+        sequence: 170
         column-alignment: start
 
       accessibility: 
@@ -641,7 +723,7 @@ regions:
         use-column-heading: true
 
       layout: 
-        sequence: 120
+        sequence: 50
         column-alignment: start
 
       accessibility: 

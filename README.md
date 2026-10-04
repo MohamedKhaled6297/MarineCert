@@ -6,7 +6,7 @@
 
 **Open Cover & Certificate Workflow**
 
-An Oracle APEX application for managing marine open covers and issuing insurance certificates through a controlled workflow with validation, approval, bulk processing, OTP authentication, dashboards, master data, and PDF reporting.
+An Oracle APEX application for managing marine open covers and issuing insurance certificates through a controlled workflow with validation, approval, audit tracking, bulk processing, OTP authentication, dashboards, master data, and PDF reporting.
 
 </div>
 
@@ -23,7 +23,7 @@ A single Open Cover can be used to issue multiple certificates while the applica
 
 Each certificate can then move through its workflow as **Accepted**, **Rejected**, or remain **Incomplete**.
 
-The application also provides bulk certificate creation, email OTP authentication, operational dashboards, master-data maintenance, and printable PDF reports.
+The application also provides certificate audit tracking, bulk certificate creation, email OTP authentication, operational dashboards, master-data maintenance, and printable PDF reports.
 
 ---
 
@@ -78,6 +78,7 @@ flowchart LR
 - Open Cover sum insured utilization control
 - Automatic certificate number generation
 - Certificate creation and editing
+- Certificate update and approval audit tracking
 - Certificate status workflow
   - Accepted
   - Rejected
@@ -100,6 +101,7 @@ flowchart LR
 - PDF certificate and receipt reports
 - Oracle BI Publisher integration
 - Responsive Oracle APEX interface
+- Audit capture for certificate updates, approvals, and rejections
 
 ---
 
@@ -138,6 +140,24 @@ After creation, a certificate can remain in one of the following statuses:
 | **Rejected** | Certificate has been rejected |
 
 The dashboard presents these statuses visually and provides a quick operational view of certificate activity.
+
+---
+
+## Certificate Audit Tracking
+
+MarineCert captures key user and timestamp information during certificate processing to provide operational traceability.
+
+The current certificate audit behavior includes:
+
+| Action | Audit Fields | Behavior |
+|---|---|---|
+| **Edit / Update** | `TC_UPD_USER`, `TC_UPD_DATE` | Records the APEX user and update timestamp when an existing certificate in **Incomplete** or **Rejected** status is edited |
+| **Reject** | `TC_UPD_USER`, `TC_UPD_DATE` | Records the user and timestamp when an **Incomplete** certificate is rejected |
+| **Approve** | `TC_APP_USER`, `TC_APPR_DATE` | Records the approving user and approval timestamp after Open Cover validation succeeds |
+
+Approval is protected by business validation before the certificate status is changed. The application checks the Open Cover capacity and prevents approval when the certificate would exceed the available sum insured.
+
+Accepted certificates are treated as read-only on the certificate form to protect finalized transaction data from further editing.
 
 ---
 
@@ -441,8 +461,8 @@ git push
 
 ## Future Improvements
 
-- Extended audit trail
-- Certificate approval history
+- Detailed certificate approval history
+- Extended field-level audit history
 - Notification history
 - Configurable email templates
 - Additional dashboard analytics

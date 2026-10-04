@@ -227,6 +227,7 @@ regions:
     landmark-type: Template Default
 
   advanced: 
+    static-id: CERTIFICATE_IR
     region-display-selector: false
     exclude-title-from-translation: false
 
@@ -906,6 +907,32 @@ page-items:
     restricted-characters: All characters can be saved.
 
 buttons: 
+- # ====== Button: EXPORT_EXCEL ================================
+  id: 4402294070369920
+  identification: 
+    button-name: EXPORT_EXCEL
+    label: Export Excel
+
+  layout: 
+    sequence: 20
+    region: Certificate # 14915121376705011
+    slot: RIGHT_OF_IR_SEARCH_BAR
+    start-new-layout: false
+    start-new-row: true
+    column: Automatic
+    new-column: true
+    column-span: Automatic
+
+  appearance: 
+    button-template: Text
+    hot: false
+    template-options: 
+    - '#DEFAULT#'
+
+  behavior: 
+    action: Defined by Dynamic Action
+    execute-validations: true
+
 - # ====== Button: CREATE ======================================
   id: 14936759197705020
   identification: 
@@ -938,6 +965,52 @@ buttons:
     warn-on-unsaved-changes: Do Not Check
 
 dynamic-actions: 
+- # ====== Dynamic Action: EXPORT_CARGO_EXCEL ==================
+  id: 4402394696369921
+  identification: 
+    name: EXPORT_CARGO_EXCEL
+
+  execution: 
+    sequence: 30
+    event-scope: Static
+    type: Immediate
+
+  when: 
+    event: Click
+    selection-type: Button
+    button: EXPORT_EXCEL # 4402294070369920
+
+  actions: 
+  - # ====== Action: Execute JavaScript Code =====================
+    id: 4402447561369922
+    identification: 
+      action: Execute JavaScript Code
+
+    settings: 
+      code: |
+        // window.location.href =
+        //     'f?p=' +
+        //     $v('pFlowId') +
+        //     ':0:' +
+        //     $v('pInstance') +
+        //     ':APPLICATION_PROCESS=EXPORT_CARGO_EXCEL';
+        
+        
+        const exportUrl =
+            'f?p=' +
+            $v('pFlowId') +
+            ':0:' +
+            $v('pInstance') +
+            ':APPLICATION_PROCESS=EXPORT_CARGO_EXCEL';
+        
+        window.location.href = exportUrl;
+
+    execution: 
+      sequence: 10
+      event: EXPORT_CARGO_EXCEL # 4402394696369921
+      fire-when-event-result-is: True
+      fire-on-initialization: false
+
 - # ====== Dynamic Action: Edit Report - Dialog Closed =========
   id: 14937036389705020
   identification: 
@@ -1014,23 +1087,174 @@ processes:
     location: Local Database
     language: PL/SQL
     pl/sql-code: |
+      DECLARE
+          L_POLICY_SUM_INSURED  NUMBER := 0;
+          L_PREVIOUS_COVERS     NUMBER := 0;
+          L_CURRENT_COVER       NUMBER := 0;
+          L_TOTAL_AFTER_APPROVE NUMBER := 0;
+          L_REMAINING_AMOUNT    NUMBER := 0;
+          L_CONTRACT_NO         VARCHAR2(100);
       BEGIN
-          UPDATE HR.TMGT_CARGO
-             SET TC_STATUS   = 'C',
-                 TC_UPD_USER = :APP_USER,
-                 TC_UPD_DATE = TO_CHAR(
-                                   SYSDATE,
-                                   'DD/MM/RRRR HH:MI:SS AM'
-                               )
-           WHERE TC_ID = :P2_TC_ID
-             AND TC_STATUS = 'I';
       
-          IF SQL%ROWCOUNT = 0 THEN
-              RAISE_APPLICATION_ERROR(
-                  -20001,
-                  'The certificate was not found or has already been processed.'
+          ----------------------------------------------------------------
+          -- Get Current Certificate Data FROM TABLE
+          ----------------------------------------------------------------
+          SELECT TC_CONTRACT_NO,
+                 NVL(TC_TOTAL_SUM_COVERS, 0)
+            INTO L_CONTRACT_NO,
+                 L_CURRENT_COVER
+            FROM HR.TMGT_CARGO
+           WHERE TC_ID = :P2_TC_ID;
+      
+      
+          ----------------------------------------------------------------
+          -- Get Active Policy Sum Insured
+          ----------------------------------------------------------------
+          SELECT NVL(SUM(SUM_INSURED), 0)
+            INTO L_POLICY_SUM_INSURED
+            FROM HR.TMGT_CARGO_OPEN_COVER
+           WHERE POLH_NO = L_CONTRACT_NO
+             AND TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE);
+      
+      
+          ----------------------------------------------------------------
+          -- Previous Covers
+          -- Include I and C
+          -- Exclude Current Certificate
+          ----------------------------------------------------------------
+          SELECT NVL(SUM(TC_TOTAL_SUM_COVERS), 0)
+            INTO L_PREVIOUS_COVERS
+            FROM HR.TMGT_CARGO
+           WHERE TC_CONTRACT_NO = L_CONTRACT_NO
+             AND NVL(TC_STATUS, 'I') IN ('I', 'C')
+             AND TC_ID <> :P2_TC_ID;
+      
+      
+          ----------------------------------------------------------------
+          -- Calculate Totals
+          ----------------------------------------------------------------
+          L_TOTAL_AFTER_APPROVE :=
+              L_PREVIOUS_COVERS + L_CURRENT_COVER;
+      
+          L_REMAINING_AMOUNT :=
+              L_POLICY_SUM_INSURED - L_PREVIOUS_COVERS;
+      
+      
+          ----------------------------------------------------------------
+          -- Validation: Current Cover
+          ----------------------------------------------------------------
+          IF L_CURRENT_COVER <= 0 THEN
+      
+              APEX_ERROR.ADD_ERROR(
+                  P_MESSAGE =>
+                      'Total Sum Covers must be greater than zero before approval.',
+      
+                  P_DISPLAY_LOCATION =>
+                      APEX_ERROR.C_INLINE_IN_NOTIFICATION
               );
+      
+      
+          ----------------------------------------------------------------
+          -- Validation: Active Policy
+          ----------------------------------------------------------------
+          ELSIF L_POLICY_SUM_INSURED <= 0 THEN
+      
+              APEX_ERROR.ADD_ERROR(
+                  P_MESSAGE =>
+                      'No active Sum Insured was found for Contract No: '
+                      || L_CONTRACT_NO,
+      
+                  P_DISPLAY_LOCATION =>
+                      APEX_ERROR.C_INLINE_IN_NOTIFICATION
+              );
+      
+      
+          ----------------------------------------------------------------
+          -- Validation: Policy Limit
+          ----------------------------------------------------------------
+          ELSIF L_TOTAL_AFTER_APPROVE > L_POLICY_SUM_INSURED THEN
+      
+              APEX_ERROR.ADD_ERROR(
+                  P_MESSAGE =>
+                        'Certificate cannot be approved. '
+                      || 'Policy Sum Insured: '
+                      || TO_CHAR(
+                             ROUND(L_POLICY_SUM_INSURED, 2),
+                             'FM999G999G999G990D00'
+                         )
+                      || ' | Previously Used: '
+                      || TO_CHAR(
+                             ROUND(L_PREVIOUS_COVERS, 2),
+                             'FM999G999G999G990D00'
+                         )
+                      || ' | Remaining: '
+                      || TO_CHAR(
+                             ROUND(
+                                 GREATEST(L_REMAINING_AMOUNT, 0),
+                                 2
+                             ),
+                             'FM999G999G999G990D00'
+                         )
+                      || ' | Current Certificate: '
+                      || TO_CHAR(
+                             ROUND(L_CURRENT_COVER, 2),
+                             'FM999G999G999G990D00'
+                         )
+                      || ' | Total After Approval: '
+                      || TO_CHAR(
+                             ROUND(L_TOTAL_AFTER_APPROVE, 2),
+                             'FM999G999G999G990D00'
+                         ),
+      
+                  P_DISPLAY_LOCATION =>
+                      APEX_ERROR.C_INLINE_IN_NOTIFICATION
+              );
+      
+      
+          ----------------------------------------------------------------
+          -- Validation Passed -> Approve
+          ----------------------------------------------------------------
+          ELSE
+      
+              UPDATE HR.TMGT_CARGO
+                 SET TC_STATUS    = 'C',
+                     TC_APP_USER  = :APP_USER,
+                     TC_APPR_DATE = TO_CHAR(
+                                        SYSDATE,
+                                        'DD/MM/RRRR HH:MI:SS AM'
+                                    )
+               WHERE TC_ID = :P2_TC_ID
+                 AND TC_STATUS = 'I';
+      
+      
+              ----------------------------------------------------------------
+              -- Check Record
+              ----------------------------------------------------------------
+              IF SQL%ROWCOUNT = 0 THEN
+      
+                  APEX_ERROR.ADD_ERROR(
+                      P_MESSAGE =>
+                          'Certificate cannot be approved. Certificate status is not I.',
+      
+                      P_DISPLAY_LOCATION =>
+                          APEX_ERROR.C_INLINE_IN_NOTIFICATION
+                  );
+      
+              END IF;
+      
           END IF;
+      
+      EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+      
+              APEX_ERROR.ADD_ERROR(
+                  P_MESSAGE =>
+                      'Certificate was not found.',
+      
+                  P_DISPLAY_LOCATION =>
+                      APEX_ERROR.C_INLINE_IN_NOTIFICATION
+              );
+      
       END;
 
   execution: 
@@ -1048,10 +1272,10 @@ processes:
     type: Request = Value
     value: APPROVE_CERTIFICATE
 
-- # ====== Process: APPROVE_CERTIFICATE_1 ======================
+- # ====== Process: REJECT_CERTIFICATE =========================
   id: 15170860095562711
   identification: 
-    name: APPROVE_CERTIFICATE_1
+    name: REJECT_CERTIFICATE
     type: Execute Code
     execution-chain: None
 

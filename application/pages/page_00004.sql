@@ -97,69 +97,9 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_use_as_row_header=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15049975833125412)
-,p_db_column_name=>'TCU_OTP_ID'
-,p_display_order=>60
-,p_column_identifier=>'Q'
-,p_column_label=>'Otp ID'
-,p_column_type=>'NUMBER'
-,p_display_text_as=>'HIDDEN_ESCAPE_SC'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15050049468125413)
-,p_db_column_name=>'TCU_OTP_CODE'
-,p_display_order=>70
-,p_column_identifier=>'R'
-,p_column_label=>'Otp Code'
-,p_column_type=>'STRING'
-,p_heading_alignment=>'LEFT'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15050221562125414)
-,p_db_column_name=>'TCU_OTP_SENT_DATE'
-,p_display_order=>80
-,p_column_identifier=>'S'
-,p_column_label=>'Otp Date'
-,p_column_type=>'STRING'
-,p_heading_alignment=>'LEFT'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15050261659125415)
-,p_db_column_name=>'TCU_OTP_IS_VAILD'
-,p_display_order=>90
-,p_column_identifier=>'T'
-,p_column_label=>'Otp Vaild Y/N'
-,p_column_type=>'STRING'
-,p_heading_alignment=>'LEFT'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15050349306125416)
-,p_db_column_name=>'TCU_SESSION_ID'
-,p_display_order=>100
-,p_column_identifier=>'U'
-,p_column_label=>'Tcu Session Id'
-,p_column_type=>'STRING'
-,p_display_text_as=>'HIDDEN_ESCAPE_SC'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
- p_id=>wwv_flow_imp.id(15050497286125417)
-,p_db_column_name=>'TCU_LOCK'
-,p_display_order=>110
-,p_column_identifier=>'V'
-,p_column_label=>'Lock Y/N'
-,p_column_type=>'STRING'
-,p_heading_alignment=>'LEFT'
-,p_use_as_row_header=>'N'
-);
-wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(15171022220562712)
 ,p_db_column_name=>'TCU_ADMIN_AUTH'
-,p_display_order=>120
+,p_display_order=>50
 ,p_column_identifier=>'Z'
 ,p_column_label=>'Admin Auth'
 ,p_column_type=>'STRING'
@@ -167,9 +107,19 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_use_as_row_header=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15050497286125417)
+,p_db_column_name=>'TCU_LOCK'
+,p_display_order=>60
+,p_column_identifier=>'V'
+,p_column_label=>'Lock Y/N'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(15050620614125418)
 ,p_db_column_name=>'TCU_LOCK_DATE'
-,p_display_order=>130
+,p_display_order=>70
 ,p_column_identifier=>'W'
 ,p_column_label=>'Lock Date'
 ,p_column_type=>'STRING'
@@ -177,9 +127,77 @@ wwv_flow_imp_page.create_worksheet_column(
 ,p_use_as_row_header=>'N'
 );
 wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(4402827886369926)
+,p_db_column_name=>'TCU_DISABLE_USER'
+,p_display_order=>80
+,p_column_identifier=>'AA'
+,p_column_label=>'Disable User'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(4402976760369927)
+,p_db_column_name=>'TCU_DISABLE_DATE'
+,p_display_order=>90
+,p_column_identifier=>'AB'
+,p_column_label=>'Disable Date'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15049975833125412)
+,p_db_column_name=>'TCU_OTP_ID'
+,p_display_order=>100
+,p_column_identifier=>'Q'
+,p_column_label=>'Otp ID'
+,p_column_type=>'NUMBER'
+,p_display_text_as=>'HIDDEN_ESCAPE_SC'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15050049468125413)
+,p_db_column_name=>'TCU_OTP_CODE'
+,p_display_order=>110
+,p_column_identifier=>'R'
+,p_column_label=>'Otp Code'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15050261659125415)
+,p_db_column_name=>'TCU_OTP_IS_VAILD'
+,p_display_order=>120
+,p_column_identifier=>'T'
+,p_column_label=>'Otp Vaild Y/N'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15050221562125414)
+,p_db_column_name=>'TCU_OTP_SENT_DATE'
+,p_display_order=>130
+,p_column_identifier=>'S'
+,p_column_label=>'Otp Date'
+,p_column_type=>'STRING'
+,p_heading_alignment=>'LEFT'
+,p_use_as_row_header=>'N'
+);
+wwv_flow_imp_page.create_worksheet_column(
+ p_id=>wwv_flow_imp.id(15050349306125416)
+,p_db_column_name=>'TCU_SESSION_ID'
+,p_display_order=>150
+,p_column_identifier=>'U'
+,p_column_label=>'Tcu Session Id'
+,p_column_type=>'STRING'
+,p_display_text_as=>'HIDDEN_ESCAPE_SC'
+);
+wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(15050665412125419)
 ,p_db_column_name=>'TCU_CR'
-,p_display_order=>140
+,p_display_order=>160
 ,p_column_identifier=>'X'
 ,p_column_label=>'Creat User'
 ,p_column_type=>'STRING'
@@ -189,7 +207,7 @@ wwv_flow_imp_page.create_worksheet_column(
 wwv_flow_imp_page.create_worksheet_column(
  p_id=>wwv_flow_imp.id(15050820341125420)
 ,p_db_column_name=>'TCU_CR_DATE'
-,p_display_order=>150
+,p_display_order=>170
 ,p_column_identifier=>'Y'
 ,p_column_label=>'Create Date'
 ,p_column_type=>'STRING'

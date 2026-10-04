@@ -129,6 +129,72 @@ regions:
       show-line-breaks: true
 
 page-items: 
+- # ====== Page Item: P5_TCU_DISABLE_USER ======================
+  id: 4402508298369923
+  identification: 
+    name: P5_TCU_DISABLE_USER
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 130
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_DISABLE_USER
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
+- # ====== Page Item: P5_TCU_DISABLE_DATE ======================
+  id: 4402679942369924
+  identification: 
+    name: P5_TCU_DISABLE_DATE
+    type: Hidden
+
+  settings: 
+    value-protected: false
+
+  layout: 
+    sequence: 140
+    region: User Login Page form # 19318024604123525
+    slot: BODY
+
+  advanced: 
+    warn-on-unsaved-changes: Page Default
+
+  source: 
+    form-region: User Login Page form # 19318024604123525
+    column: TCU_DISABLE_DATE
+    data-type: VARCHAR2
+    query-only: false
+    primary-key: false
+
+  session-state: 
+    data-type: VARCHAR2
+    storage: Per Request (Memory Only)
+
+  security: 
+    session-state-protection: Unrestricted
+    store-value-encrypted-in-session-state: true
+    restricted-characters: All characters can be saved.
+
 - # ====== Page Item: P5_TCU_ID ================================
   id: 15050922793125421
   identification: 
@@ -615,7 +681,7 @@ page-items:
     value-protected: false
 
   layout: 
-    sequence: 130
+    sequence: 150
     region: User Login Page form # 19318024604123525
     slot: BODY
 
@@ -653,7 +719,7 @@ page-items:
     value-protected: false
 
   layout: 
-    sequence: 140
+    sequence: 160
     region: User Login Page form # 19318024604123525
     slot: BODY
 
@@ -900,6 +966,53 @@ dynamic-actions:
       fire-on-initialization: false
 
 processes: 
+- # ====== Process: Set Manual Lock Audit ======================
+  id: 4402799905369925
+  identification: 
+    name: Set Manual Lock Audit
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_OLD_LOCK HR.TMGT_CARGO_USER.TCU_LOCK%TYPE;
+      BEGIN
+      
+          /* Get current value from database before APEX updates the row */
+          SELECT NVL(TCU_LOCK, 'N')
+            INTO L_OLD_LOCK
+            FROM HR.TMGT_CARGO_USER
+           WHERE TCU_ID = :P5_TCU_ID;
+      
+      
+          /* Manual Lock: N -> Y */
+          IF L_OLD_LOCK = 'N'
+             AND :P5_TCU_LOCK = 'Y'
+          THEN
+      
+              :P5_TCU_DISABLE_USER := :APP_USER;
+      
+              :P5_TCU_DISABLE_DATE :=
+                  TO_CHAR(
+                      SYSDATE,
+                      'DD/MM/RRRR HH:MI:SS AM'
+                  );
+      
+          END IF;
+      
+      END;
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
 - # ====== Process: Initialize form User Login Page form =======
   id: 19328339383123531
   identification: 
@@ -928,7 +1041,7 @@ processes:
     return-primary-key(s)-after-insert: true
 
   execution: 
-    sequence: 10
+    sequence: 20
     point: Processing
     run-process: Once Per Page Visit (default)
 
@@ -946,7 +1059,7 @@ processes:
     show-success-messages: true
 
   execution: 
-    sequence: 50
+    sequence: 30
     point: Processing
     run-process: Once Per Page Visit (default)
 

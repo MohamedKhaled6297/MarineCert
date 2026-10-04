@@ -2049,7 +2049,8 @@ wwv_flow_imp_page.create_page_da_action(
 '                        .setValue(data.insuredAddress);',
 '',
 '                    apex.item("P3_TC_COVER_RATE")',
-'                        .setValue(data.cover_rate || "");',
+'                        .setValue(data.cover_rate ?? 0);',
+'                        // .setValue(data.cover_rate || "");',
 '',
 '                    calculateCargoValues();',
 '                } else {',
@@ -2289,7 +2290,33 @@ wwv_flow_imp_page.create_page_da_action(
 ,p_action_sequence=>10
 ,p_execute_on_page_init=>'Y'
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
-,p_attribute_01=>'calculateCargoValues();'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'const invoiceItem = apex.item("P3_TC_INVOICE_VALUE");',
+'const invoiceValue = invoiceItem.getValue().trim();',
+'',
+'apex.message.clearErrors();',
+'',
+'if (invoiceValue === "") {',
+'    return;',
+'}',
+'',
+'const numericValue = Number(invoiceValue.replace(/,/g, ""));',
+'',
+'if (!Number.isFinite(numericValue)) {',
+'    apex.message.showErrors([',
+'        {',
+'            type: "error",',
+'            location: ["inline", "page"],',
+'            pageItem: "P3_TC_INVOICE_VALUE",',
+'            message: "Invoice Value must be a valid number.",',
+'            unsafe: false',
+'        }',
+'    ]);',
+'',
+'    return;',
+'}',
+'',
+'calculateCargoValues();'))
 );
 wwv_flow_imp_page.create_page_da_event(
  p_id=>wwv_flow_imp.id(15168555926562688)
@@ -2383,8 +2410,45 @@ wwv_flow_imp_page.create_page_da_action(
 '})();'))
 );
 wwv_flow_imp_page.create_page_process(
- p_id=>wwv_flow_imp.id(14913717583705010)
+ p_id=>wwv_flow_imp.id(4403099835369928)
 ,p_process_sequence=>10
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Set Certificate Update Audit'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'DECLARE',
+'    L_STATUS HR.TMGT_CARGO.TC_STATUS%TYPE;',
+'BEGIN',
+'',
+'    IF :P3_TC_ID IS NOT NULL THEN',
+'',
+'        SELECT TC_STATUS',
+'          INTO L_STATUS',
+'          FROM HR.TMGT_CARGO',
+'         WHERE TC_ID = :P3_TC_ID;',
+'',
+'        IF L_STATUS = ''I'' OR L_STATUS = ''R'' THEN',
+'',
+'            :P3_TC_UPD_USER := :APP_USER;',
+'',
+'            :P3_TC_UPD_DATE :=',
+'                TO_CHAR(',
+'                    SYSDATE,',
+'                    ''DD/MM/RRRR HH:MI:SS AM''',
+'                );',
+'',
+'        END IF;',
+'',
+'    END IF;',
+'',
+'END;'))
+,p_process_clob_language=>'PLSQL'
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_internal_uid=>4403099835369928
+);
+wwv_flow_imp_page.create_page_process(
+ p_id=>wwv_flow_imp.id(14913717583705010)
+,p_process_sequence=>20
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_region_id=>wwv_flow_imp.id(14873526722704991)
 ,p_process_type=>'NATIVE_FORM_DML'
@@ -2398,10 +2462,11 @@ wwv_flow_imp_page.create_page_process(
 );
 wwv_flow_imp_page.create_page_process(
  p_id=>wwv_flow_imp.id(14914032322705010)
-,p_process_sequence=>50
+,p_process_sequence=>30
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_process_type=>'NATIVE_CLOSE_WINDOW'
 ,p_process_name=>'Close Dialog'
+,p_attribute_02=>'Y'
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when=>'CREATE,SAVE,DELETE'
 ,p_process_when_type=>'REQUEST_IN_CONDITION'

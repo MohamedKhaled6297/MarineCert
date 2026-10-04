@@ -111,6 +111,34 @@ wwv_flow_imp_page.create_page_button(
 ,p_database_action=>'INSERT'
 );
 wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(4402508298369923)
+,p_name=>'P5_TCU_DISABLE_USER'
+,p_source_data_type=>'VARCHAR2'
+,p_item_sequence=>130
+,p_item_plug_id=>wwv_flow_imp.id(19318024604123525)
+,p_item_source_plug_id=>wwv_flow_imp.id(19318024604123525)
+,p_source=>'TCU_DISABLE_USER'
+,p_source_type=>'REGION_SOURCE_COLUMN'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_is_persistent=>'N'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'value_protected', 'N')).to_clob
+);
+wwv_flow_imp_page.create_page_item(
+ p_id=>wwv_flow_imp.id(4402679942369924)
+,p_name=>'P5_TCU_DISABLE_DATE'
+,p_source_data_type=>'VARCHAR2'
+,p_item_sequence=>140
+,p_item_plug_id=>wwv_flow_imp.id(19318024604123525)
+,p_item_source_plug_id=>wwv_flow_imp.id(19318024604123525)
+,p_source=>'TCU_DISABLE_DATE'
+,p_source_type=>'REGION_SOURCE_COLUMN'
+,p_display_as=>'NATIVE_HIDDEN'
+,p_is_persistent=>'N'
+,p_attributes=>wwv_flow_t_plugin_attributes(wwv_flow_t_varchar2(
+  'value_protected', 'N')).to_clob
+);
+wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(15050922793125421)
 ,p_name=>'P5_TCU_ID'
 ,p_source_data_type=>'NUMBER'
@@ -309,7 +337,7 @@ wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(15051947539125432)
 ,p_name=>'P5_TCU_CR'
 ,p_source_data_type=>'VARCHAR2'
-,p_item_sequence=>130
+,p_item_sequence=>150
 ,p_item_plug_id=>wwv_flow_imp.id(19318024604123525)
 ,p_item_source_plug_id=>wwv_flow_imp.id(19318024604123525)
 ,p_item_default=>':APP_user'
@@ -326,7 +354,7 @@ wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(15052034394125433)
 ,p_name=>'P5_TCU_CR_DATE'
 ,p_source_data_type=>'VARCHAR2'
-,p_item_sequence=>140
+,p_item_sequence=>160
 ,p_item_plug_id=>wwv_flow_imp.id(19318024604123525)
 ,p_item_source_plug_id=>wwv_flow_imp.id(19318024604123525)
 ,p_item_default=>'TO_CHAR(SYSDATE, ''DD/MM/RRRR HH:MI:SS AM'')'
@@ -378,8 +406,46 @@ wwv_flow_imp_page.create_page_da_action(
 ,p_action=>'NATIVE_DIALOG_CANCEL'
 );
 wwv_flow_imp_page.create_page_process(
- p_id=>wwv_flow_imp.id(19328760123123531)
+ p_id=>wwv_flow_imp.id(4402799905369925)
 ,p_process_sequence=>10
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'Set Manual Lock Audit'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'DECLARE',
+'    L_OLD_LOCK HR.TMGT_CARGO_USER.TCU_LOCK%TYPE;',
+'BEGIN',
+'',
+'    /* Get current value from database before APEX updates the row */',
+'    SELECT NVL(TCU_LOCK, ''N'')',
+'      INTO L_OLD_LOCK',
+'      FROM HR.TMGT_CARGO_USER',
+'     WHERE TCU_ID = :P5_TCU_ID;',
+'',
+'',
+'    /* Manual Lock: N -> Y */',
+'    IF L_OLD_LOCK = ''N''',
+'       AND :P5_TCU_LOCK = ''Y''',
+'    THEN',
+'',
+'        :P5_TCU_DISABLE_USER := :APP_USER;',
+'',
+'        :P5_TCU_DISABLE_DATE :=',
+'            TO_CHAR(',
+'                SYSDATE,',
+'                ''DD/MM/RRRR HH:MI:SS AM''',
+'            );',
+'',
+'    END IF;',
+'',
+'END;'))
+,p_process_clob_language=>'PLSQL'
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_internal_uid=>4402799905369925
+);
+wwv_flow_imp_page.create_page_process(
+ p_id=>wwv_flow_imp.id(19328760123123531)
+,p_process_sequence=>20
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_region_id=>wwv_flow_imp.id(19318024604123525)
 ,p_process_type=>'NATIVE_FORM_DML'
@@ -393,10 +459,11 @@ wwv_flow_imp_page.create_page_process(
 );
 wwv_flow_imp_page.create_page_process(
  p_id=>wwv_flow_imp.id(19329124910123531)
-,p_process_sequence=>50
+,p_process_sequence=>30
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_process_type=>'NATIVE_CLOSE_WINDOW'
 ,p_process_name=>'Close Dialog'
+,p_attribute_02=>'Y'
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when=>'CREATE,SAVE,DELETE'
 ,p_process_when_type=>'REQUEST_IN_CONDITION'

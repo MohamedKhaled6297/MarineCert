@@ -126,6 +126,7 @@ wwv_flow_imp_page.create_page(
 wwv_flow_imp_page.create_page_plug(
  p_id=>wwv_flow_imp.id(14915121376705011)
 ,p_plug_name=>'Certificate'
+,p_region_name=>'CERTIFICATE_IR'
 ,p_region_template_options=>'#DEFAULT#:t-IRR-region--hideHeader js-addHiddenHeadingRoleDesc'
 ,p_plug_template=>2100526641005906379
 ,p_plug_display_sequence=>10
@@ -370,6 +371,18 @@ wwv_flow_imp_page.create_page_button(
 ,p_button_position=>'RIGHT_OF_IR_SEARCH_BAR'
 ,p_button_redirect_url=>'f?p=&APP_ID.:3:&SESSION.::&DEBUG.:3::'
 );
+wwv_flow_imp_page.create_page_button(
+ p_id=>wwv_flow_imp.id(4402294070369920)
+,p_button_sequence=>20
+,p_button_plug_id=>wwv_flow_imp.id(14915121376705011)
+,p_button_name=>'EXPORT_EXCEL'
+,p_button_action=>'DEFINED_BY_DA'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>4072362960822175091
+,p_button_image_alt=>'Export Excel'
+,p_button_position=>'RIGHT_OF_IR_SEARCH_BAR'
+,p_warn_on_unsaved_changes=>null
+);
 wwv_flow_imp_page.create_page_item(
  p_id=>wwv_flow_imp.id(15170550327562708)
 ,p_name=>'P2_TC_ID'
@@ -417,6 +430,41 @@ wwv_flow_imp_page.create_page_da_action(
 ,p_action=>'NATIVE_JAVASCRIPT_CODE'
 ,p_attribute_01=>'window.location.reload();'
 );
+wwv_flow_imp_page.create_page_da_event(
+ p_id=>wwv_flow_imp.id(4402394696369921)
+,p_name=>'EXPORT_CARGO_EXCEL'
+,p_event_sequence=>30
+,p_triggering_element_type=>'BUTTON'
+,p_triggering_button_id=>wwv_flow_imp.id(4402294070369920)
+,p_bind_type=>'bind'
+,p_execution_type=>'IMMEDIATE'
+,p_bind_event_type=>'click'
+);
+wwv_flow_imp_page.create_page_da_action(
+ p_id=>wwv_flow_imp.id(4402447561369922)
+,p_event_id=>wwv_flow_imp.id(4402394696369921)
+,p_event_result=>'TRUE'
+,p_action_sequence=>10
+,p_execute_on_page_init=>'N'
+,p_action=>'NATIVE_JAVASCRIPT_CODE'
+,p_attribute_01=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'// window.location.href =',
+'//     ''f?p='' +',
+'//     $v(''pFlowId'') +',
+'//     '':0:'' +',
+'//     $v(''pInstance'') +',
+'//     '':APPLICATION_PROCESS=EXPORT_CARGO_EXCEL'';',
+'',
+'',
+'const exportUrl =',
+'    ''f?p='' +',
+'    $v(''pFlowId'') +',
+'    '':0:'' +',
+'    $v(''pInstance'') +',
+'    '':APPLICATION_PROCESS=EXPORT_CARGO_EXCEL'';',
+'',
+'window.location.href = exportUrl;'))
+);
 wwv_flow_imp_page.create_page_process(
  p_id=>wwv_flow_imp.id(15170768872562710)
 ,p_process_sequence=>10
@@ -424,23 +472,174 @@ wwv_flow_imp_page.create_page_process(
 ,p_process_type=>'NATIVE_PLSQL'
 ,p_process_name=>'APPROVE_CERTIFICATE'
 ,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'DECLARE',
+'    L_POLICY_SUM_INSURED  NUMBER := 0;',
+'    L_PREVIOUS_COVERS     NUMBER := 0;',
+'    L_CURRENT_COVER       NUMBER := 0;',
+'    L_TOTAL_AFTER_APPROVE NUMBER := 0;',
+'    L_REMAINING_AMOUNT    NUMBER := 0;',
+'    L_CONTRACT_NO         VARCHAR2(100);',
 'BEGIN',
-'    UPDATE HR.TMGT_CARGO',
-'       SET TC_STATUS   = ''C'',',
-'           TC_UPD_USER = :APP_USER,',
-'           TC_UPD_DATE = TO_CHAR(',
-'                             SYSDATE,',
-'                             ''DD/MM/RRRR HH:MI:SS AM''',
-'                         )',
-'     WHERE TC_ID = :P2_TC_ID',
-'       AND TC_STATUS = ''I'';',
 '',
-'    IF SQL%ROWCOUNT = 0 THEN',
-'        RAISE_APPLICATION_ERROR(',
-'            -20001,',
-'            ''The certificate was not found or has already been processed.''',
+'    ----------------------------------------------------------------',
+'    -- Get Current Certificate Data FROM TABLE',
+'    ----------------------------------------------------------------',
+'    SELECT TC_CONTRACT_NO,',
+'           NVL(TC_TOTAL_SUM_COVERS, 0)',
+'      INTO L_CONTRACT_NO,',
+'           L_CURRENT_COVER',
+'      FROM HR.TMGT_CARGO',
+'     WHERE TC_ID = :P2_TC_ID;',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Get Active Policy Sum Insured',
+'    ----------------------------------------------------------------',
+'    SELECT NVL(SUM(SUM_INSURED), 0)',
+'      INTO L_POLICY_SUM_INSURED',
+'      FROM HR.TMGT_CARGO_OPEN_COVER',
+'     WHERE POLH_NO = L_CONTRACT_NO',
+'       AND TRUNC(EXPIREY_DATE) >= TRUNC(SYSDATE);',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Previous Covers',
+'    -- Include I and C',
+'    -- Exclude Current Certificate',
+'    ----------------------------------------------------------------',
+'    SELECT NVL(SUM(TC_TOTAL_SUM_COVERS), 0)',
+'      INTO L_PREVIOUS_COVERS',
+'      FROM HR.TMGT_CARGO',
+'     WHERE TC_CONTRACT_NO = L_CONTRACT_NO',
+'       AND NVL(TC_STATUS, ''I'') IN (''I'', ''C'')',
+'       AND TC_ID <> :P2_TC_ID;',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Calculate Totals',
+'    ----------------------------------------------------------------',
+'    L_TOTAL_AFTER_APPROVE :=',
+'        L_PREVIOUS_COVERS + L_CURRENT_COVER;',
+'',
+'    L_REMAINING_AMOUNT :=',
+'        L_POLICY_SUM_INSURED - L_PREVIOUS_COVERS;',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Validation: Current Cover',
+'    ----------------------------------------------------------------',
+'    IF L_CURRENT_COVER <= 0 THEN',
+'',
+'        APEX_ERROR.ADD_ERROR(',
+'            P_MESSAGE =>',
+'                ''Total Sum Covers must be greater than zero before approval.'',',
+'',
+'            P_DISPLAY_LOCATION =>',
+'                APEX_ERROR.C_INLINE_IN_NOTIFICATION',
 '        );',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Validation: Active Policy',
+'    ----------------------------------------------------------------',
+'    ELSIF L_POLICY_SUM_INSURED <= 0 THEN',
+'',
+'        APEX_ERROR.ADD_ERROR(',
+'            P_MESSAGE =>',
+'                ''No active Sum Insured was found for Contract No: ''',
+'                || L_CONTRACT_NO,',
+'',
+'            P_DISPLAY_LOCATION =>',
+'                APEX_ERROR.C_INLINE_IN_NOTIFICATION',
+'        );',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Validation: Policy Limit',
+'    ----------------------------------------------------------------',
+'    ELSIF L_TOTAL_AFTER_APPROVE > L_POLICY_SUM_INSURED THEN',
+'',
+'        APEX_ERROR.ADD_ERROR(',
+'            P_MESSAGE =>',
+'                  ''Certificate cannot be approved. ''',
+'                || ''Policy Sum Insured: ''',
+'                || TO_CHAR(',
+'                       ROUND(L_POLICY_SUM_INSURED, 2),',
+'                       ''FM999G999G999G990D00''',
+'                   )',
+'                || '' | Previously Used: ''',
+'                || TO_CHAR(',
+'                       ROUND(L_PREVIOUS_COVERS, 2),',
+'                       ''FM999G999G999G990D00''',
+'                   )',
+'                || '' | Remaining: ''',
+'                || TO_CHAR(',
+'                       ROUND(',
+'                           GREATEST(L_REMAINING_AMOUNT, 0),',
+'                           2',
+'                       ),',
+'                       ''FM999G999G999G990D00''',
+'                   )',
+'                || '' | Current Certificate: ''',
+'                || TO_CHAR(',
+'                       ROUND(L_CURRENT_COVER, 2),',
+'                       ''FM999G999G999G990D00''',
+'                   )',
+'                || '' | Total After Approval: ''',
+'                || TO_CHAR(',
+'                       ROUND(L_TOTAL_AFTER_APPROVE, 2),',
+'                       ''FM999G999G999G990D00''',
+'                   ),',
+'',
+'            P_DISPLAY_LOCATION =>',
+'                APEX_ERROR.C_INLINE_IN_NOTIFICATION',
+'        );',
+'',
+'',
+'    ----------------------------------------------------------------',
+'    -- Validation Passed -> Approve',
+'    ----------------------------------------------------------------',
+'    ELSE',
+'',
+'        UPDATE HR.TMGT_CARGO',
+'           SET TC_STATUS    = ''C'',',
+'               TC_APP_USER  = :APP_USER,',
+'               TC_APPR_DATE = TO_CHAR(',
+'                                  SYSDATE,',
+'                                  ''DD/MM/RRRR HH:MI:SS AM''',
+'                              )',
+'         WHERE TC_ID = :P2_TC_ID',
+'           AND TC_STATUS = ''I'';',
+'',
+'',
+'        ----------------------------------------------------------------',
+'        -- Check Record',
+'        ----------------------------------------------------------------',
+'        IF SQL%ROWCOUNT = 0 THEN',
+'',
+'            APEX_ERROR.ADD_ERROR(',
+'                P_MESSAGE =>',
+'                    ''Certificate cannot be approved. Certificate status is not I.'',',
+'',
+'                P_DISPLAY_LOCATION =>',
+'                    APEX_ERROR.C_INLINE_IN_NOTIFICATION',
+'            );',
+'',
+'        END IF;',
+'',
 '    END IF;',
+'',
+'EXCEPTION',
+'    WHEN NO_DATA_FOUND THEN',
+'',
+'        APEX_ERROR.ADD_ERROR(',
+'            P_MESSAGE =>',
+'                ''Certificate was not found.'',',
+'',
+'            P_DISPLAY_LOCATION =>',
+'                APEX_ERROR.C_INLINE_IN_NOTIFICATION',
+'        );',
+'',
 'END;'))
 ,p_process_clob_language=>'PLSQL'
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
@@ -454,7 +653,7 @@ wwv_flow_imp_page.create_page_process(
 ,p_process_sequence=>20
 ,p_process_point=>'AFTER_SUBMIT'
 ,p_process_type=>'NATIVE_PLSQL'
-,p_process_name=>'APPROVE_CERTIFICATE_1'
+,p_process_name=>'REJECT_CERTIFICATE'
 ,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'BEGIN',
 '    UPDATE HR.TMGT_CARGO',

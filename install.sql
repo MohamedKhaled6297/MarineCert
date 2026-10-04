@@ -24,6 +24,7 @@ prompt --install
 @@application/shared_components/security/authorizations/admin_auth.sql
 @@application/shared_components/security/authorizations/administration_rights.sql
 @@application/shared_components/navigation/navigation_bar.sql
+@@application/shared_components/logic/application_processes/export_cargo_excel.sql
 @@application/shared_components/logic/application_items/g_print_certificate_id.sql
 @@application/shared_components/logic/application_settings.sql
 @@application/shared_components/navigation/tabs/standard.sql

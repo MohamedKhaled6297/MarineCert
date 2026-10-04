@@ -1,0 +1,194 @@
+---
+- # ====== Application Process: EXPORT_CARGO_EXCEL =============
+  id: 6498845357280923
+  identification: 
+    name: EXPORT_CARGO_EXCEL
+    type: NATIVE_PLSQL
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_REPORT          APEX_IR.T_REPORT;
+          L_REPORT_SQL      VARCHAR2(32767);
+          L_EXPORT_SQL      VARCHAR2(32767);
+      
+          L_CONTEXT         APEX_EXEC.T_CONTEXT;
+          L_EXPORT          APEX_DATA_EXPORT.T_EXPORT;
+      
+          L_REGION_ID       NUMBER;
+          L_PARAMETERS      APEX_EXEC.T_PARAMETERS;
+      
+      BEGIN
+      
+          /*==========================================================
+            1- Get Certificate Interactive Report Region ID
+          ==========================================================*/
+          SELECT REGION_ID
+            INTO L_REGION_ID
+            FROM APEX_APPLICATION_PAGE_REGIONS
+           WHERE APPLICATION_ID = :APP_ID
+             AND PAGE_ID        = 2
+             AND STATIC_ID      = 'CERTIFICATE_IR';
+      
+      
+          /*==========================================================
+            2- Get Current Interactive Report
+               including current Search / Filters
+          ==========================================================*/
+          L_REPORT := APEX_IR.GET_REPORT(
+              P_PAGE_ID   => 2,
+              P_REGION_ID => L_REGION_ID
+          );
+      
+          L_REPORT_SQL := L_REPORT.SQL_QUERY;
+      
+      
+          /*==========================================================
+            3- Copy IR bind variables
+          ==========================================================*/
+          IF L_REPORT.BINDS.COUNT > 0 THEN
+      
+              FOR I IN 1 .. L_REPORT.BINDS.COUNT LOOP
+      
+                  APEX_EXEC.ADD_PARAMETER(
+                      P_PARAMETERS => L_PARAMETERS,
+                      P_NAME       => L_REPORT.BINDS(I).NAME,
+                      P_VALUE      => L_REPORT.BINDS(I).VALUE
+                  );
+      
+              END LOOP;
+      
+          END IF;
+      
+      
+          /*==========================================================
+            4- Full Export Query
+      
+            IR determines rows.
+            TMGT_CARGO determines exported columns.
+          ==========================================================*/
+          L_EXPORT_SQL :=
+              'SELECT
+                   C.TC_CONTRACT_NO           AS "Contract No",
+                   C.TC_CERTIFICATE_NO        AS "Certificate No",
+                   C.TC_INSURED_NAME          AS "Insured Name",
+                   C.TC_INSURED_ADDRESS       AS "Insured Address",
+                   C.TC_BENEFICIARY_NAME      AS "Beneficiary Name",
+                   C.TC_BENEFICIARY_ADDRESS   AS "Beneficiary Address",
+      
+                   C.TC_ISSUE_DATE             AS "Issue Date",
+                   C.TC_ISSUANCE_CURRENCY     AS "Issuance Currency",
+                   C.TC_ISSUANCE_EX_RATE      AS "Issuance Exchange Rate",
+                   C.TC_COVER_RATE             AS "Cover Rate",
+      
+                   C.TC_COUNTRY_FROM           AS "Country From",
+                   C.TC_COUNTRY_TO             AS "Country To",
+                   C.TC_PORT_OF_LOADING        AS "Port Of Loading",
+                   C.TC_PORT_OF_ARRIVAL        AS "Port Of Arrival",
+                   C.TC_PLACE_OF_LOADING       AS "Place Of Loading",
+                   C.TC_FINAL_DESTINATION      AS "Final Destination",
+      
+                   C.TC_NAME_OF_THE_VESSEL    AS "Name Of The Vessel",
+                   C.TC_VOYAGE_NO              AS "Voyage No",
+                   C.TC_TRANSIT_MODE           AS "Transit Mode",
+                   C.TC_DEPARTURE_DATE         AS "Departure Date",
+      
+                   C.TC_INVOICE_VALUE          AS "Invoice Value",
+                   C.TC_GOODS_DESCRIPTION      AS "Goods Description",
+      
+                   CASE NVL(C.TC_FREIGHT_YN, ''0'')
+                       WHEN ''1'' THEN ''Yes''
+                       ELSE ''No''
+                   END                         AS "Freight Y/N",
+      
+                   C.TC_FREIGHT_CURRENCY      AS "Freight Currency",
+                   C.TC_FREIGHT_EX_RATE       AS "Freight Exchange Rate",
+                   C.TC_FREIGHT_CHARGE        AS "Freight Charge",
+                   C.TC_FREIGHT_FINAL         AS "Freight Final",
+      
+                   C.TC_HBL                   AS "HBL",
+                   C.TC_MBL                   AS "MBL",
+      
+                   C.TC_INCO_TERMS            AS "Inco Terms",
+                   C.TC_INCO_PREC             AS "Inco Prec",
+                   C.TC_ADD_INCOTERMS         AS "Add Incoterms",
+                   C.TC_INCO_VALUE            AS "Inco Value",
+      
+                   C.TC_LC_NO                 AS "LC No",
+                   C.TC_ACID_NO               AS "ACID No",
+      
+                   C.TC_INVOICE_CURRENCY      AS "Invoice Currency",
+                   C.TC_CONTAINER_NO          AS "Container No",
+                   C.TC_INVOICE_NO            AS "Invoice No",
+      
+                   C.TC_TOTAL_SHIPMENT_VALUE  AS "Total Shipment Value",
+                   C.TC_TOTAL_SUM_COVERS       AS "Total Sum Covers",
+                   C.TC_NET_PREMIUM            AS "Net Premium",
+                   C.TC_GROSS_PREMIUM          AS "Gross Premium",
+      
+                   CASE NVL(C.TC_STATUS, ''I'')
+                       WHEN ''C'' THEN ''Accepted''
+                       WHEN ''R'' THEN ''Rejected''
+                       ELSE ''Incomplete''
+                   END                         AS "Status"
+      
+               FROM HR.TMGT_CARGO C
+      
+               WHERE C.TC_ID IN
+               (
+                   SELECT IR.TC_ID
+                     FROM (' || L_REPORT_SQL || ') IR
+               )
+      
+               ORDER BY C.TC_ID DESC';
+      
+      
+          /*==========================================================
+            5- Open Query
+          ==========================================================*/
+          L_CONTEXT := APEX_EXEC.OPEN_QUERY_CONTEXT(
+              P_LOCATION       => APEX_EXEC.C_LOCATION_LOCAL_DB,
+              P_SQL_QUERY      => L_EXPORT_SQL,
+              P_SQL_PARAMETERS => L_PARAMETERS
+          );
+      
+      
+          /*==========================================================
+            6- Create XLSX
+          ==========================================================*/
+          L_EXPORT := APEX_DATA_EXPORT.EXPORT(
+              P_CONTEXT   => L_CONTEXT,
+              P_FORMAT    => APEX_DATA_EXPORT.C_FORMAT_XLSX,
+              P_FILE_NAME => 'Cargo_Certificates'
+          );
+      
+      
+          /*==========================================================
+            7- Close context
+          ==========================================================*/
+          APEX_EXEC.CLOSE(
+              L_CONTEXT
+          );
+      
+      
+          /*==========================================================
+            8- Download
+          ==========================================================*/
+          APEX_DATA_EXPORT.DOWNLOAD(
+              P_EXPORT => L_EXPORT
+          );
+      
+      END;
+
+  execution: 
+    sequence: 1
+    point: Ajax Callback
+
+  security: 
+    authorization-scheme: Must Not Be Public User
+
+  subscription: 
+    version-number: 5339292
+

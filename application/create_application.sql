@@ -54,7 +54,7 @@ wwv_imp_workspace.create_flow(
 ,p_substitution_value_01=>'First App'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_files_version=>210
-,p_version_scn=>4982079
+,p_version_scn=>5352506
 ,p_print_server_type=>'REMOTE'
 ,p_print_remote_server_id=>wwv_flow_imp.id(4200953720770031)
 ,p_print_credential_id=>wwv_flow_imp.id(4603085926400242)

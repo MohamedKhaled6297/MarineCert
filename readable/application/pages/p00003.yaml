@@ -4148,7 +4148,8 @@ dynamic-actions:
                                 .setValue(data.insuredAddress);
         
                             apex.item("P3_TC_COVER_RATE")
-                                .setValue(data.cover_rate || "");
+                                .setValue(data.cover_rate ?? 0);
+                                // .setValue(data.cover_rate || "");
         
                             calculateCargoValues();
                         } else {
@@ -4431,7 +4432,33 @@ dynamic-actions:
       action: Execute JavaScript Code
 
     settings: 
-      code: calculateCargoValues();
+      code: |
+        const invoiceItem = apex.item("P3_TC_INVOICE_VALUE");
+        const invoiceValue = invoiceItem.getValue().trim();
+        
+        apex.message.clearErrors();
+        
+        if (invoiceValue === "") {
+            return;
+        }
+        
+        const numericValue = Number(invoiceValue.replace(/,/g, ""));
+        
+        if (!Number.isFinite(numericValue)) {
+            apex.message.showErrors([
+                {
+                    type: "error",
+                    location: ["inline", "page"],
+                    pageItem: "P3_TC_INVOICE_VALUE",
+                    message: "Invoice Value must be a valid number.",
+                    unsafe: false
+                }
+            ]);
+        
+            return;
+        }
+        
+        calculateCargoValues();
 
     execution: 
       sequence: 10
@@ -4716,6 +4743,52 @@ validations:
     item: P3_TC_ID
 
 processes: 
+- # ====== Process: Set Certificate Update Audit ===============
+  id: 4403099835369928
+  identification: 
+    name: Set Certificate Update Audit
+    type: Execute Code
+    execution-chain: None
+
+  source: 
+    location: Local Database
+    language: PL/SQL
+    pl/sql-code: |
+      DECLARE
+          L_STATUS HR.TMGT_CARGO.TC_STATUS%TYPE;
+      BEGIN
+      
+          IF :P3_TC_ID IS NOT NULL THEN
+      
+              SELECT TC_STATUS
+                INTO L_STATUS
+                FROM HR.TMGT_CARGO
+               WHERE TC_ID = :P3_TC_ID;
+      
+              IF L_STATUS = 'I' OR L_STATUS = 'R' THEN
+      
+                  :P3_TC_UPD_USER := :APP_USER;
+      
+                  :P3_TC_UPD_DATE :=
+                      TO_CHAR(
+                          SYSDATE,
+                          'DD/MM/RRRR HH:MI:SS AM'
+                      );
+      
+              END IF;
+      
+          END IF;
+      
+      END;
+
+  execution: 
+    sequence: 10
+    point: Processing
+    run-process: Once Per Page Visit (default)
+
+  error: 
+    display-location: Inline in Notification
+
 - # ====== Process: Initialize form Add/Edit Certificate =======
   id: 14913269316705010
   identification: 
@@ -4744,7 +4817,7 @@ processes:
     return-primary-key(s)-after-insert: true
 
   execution: 
-    sequence: 10
+    sequence: 20
     point: Processing
     run-process: Once Per Page Visit (default)
 
@@ -4762,7 +4835,7 @@ processes:
     show-success-messages: true
 
   execution: 
-    sequence: 50
+    sequence: 30
     point: Processing
     run-process: Once Per Page Visit (default)
 
